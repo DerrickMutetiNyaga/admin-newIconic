@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses - Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .auth-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .auth-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .main-content {
+            display: none;
+        }
+        .main-content.authenticated {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication loading overlay -->
+    <div class="auth-loading" id="authLoading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>TEMS</h2>
+                <p>Ticketing & Expense Management</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
+                <li><a href="expenses.html" class="active"><i class="fas fa-receipt"></i> Expenses</a></li>
+                <li><a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="username">Loading...</span>
+                        <button id="logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <h1>Expenses</h1>
+                    <p class="date">Today: <span id="currentDate"></span></p>
+                </div>
+                <div class="header-right">
+                    <button class="btn-primary" id="newExpenseBtn">
+                        <i class="fas fa-plus"></i> New Expense
+                    </button>
+                </div>
+            </header>
+
+            <div class="filters-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search expenses...">
+                </div>
+                <div class="filter-group">
+                    <select id="categoryFilter">
+                        <option value="All Categories">All Categories</option>
+                        <option value="Salaries">Salaries</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select id="paymentMethodFilter">
+                        <option value="All Payment Methods">All Payment Methods</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Credit Card">Credit Card</option>
+                    </select>
+                    <input type="text" id="dateRangeFilter" placeholder="Select Date Range" readonly>
+                    <button id="resetFilters" class="btn-secondary">
+                        <i class="fas fa-sync-alt"></i> Reset Filters
+                    </button>
+                </div>
+                <div class="export-section">
+                    <div class="export-controls">
+                        <input type="text" id="exportDateRange" placeholder="Select Export Date Range" readonly>
+                        <button id="exportBtn" class="export-btn">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon expense">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Expenses</h3>
+                        <p id="totalAmount">KES 0.00</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon monthly">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Monthly Total</h3>
+                        <p id="monthlyAmount">KES 0.00</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon category">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Categories</h3>
+                        <p id="categoryCount">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon average">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Daily Average</h3>
+                        <p id="dailyAverage">KES 0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Expense Categories</h3>
+                        <div class="chart-actions">
+                            <button class="refresh-chart" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Monthly Expenses</h3>
+                        <div class="chart-actions">
+                            <button class="refresh-chart" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monthlyBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Expense Trend</h3>
+                        <div class="chart-actions">
+                            <button class="refresh-chart" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trendLineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="expenses-section">
+                <div id="expensesList" class="expenses-grid">
+                    <!-- Expenses will be dynamically inserted here -->
+                </div>
+                <div id="noExpenses" class="expenses-empty" style="display: none;">
+                    <i class="fas fa-receipt"></i>
+                    <p>No expenses found</p>
+                    <span>Add a new expense or adjust your filters</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Expense Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Expense</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="expenseName">Expense Name *</label>
+                    <input type="text" id="expenseName" required>
+                </div>
+                <div class="form-group">
+                    <label for="expenseCategory">Category *</label>
+                    <select id="expenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Salaries">Salaries</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expenseAmount">Amount (KES) *</label>
+                    <input type="number" id="expenseAmount" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="expenseDate">Date and Time *</label>
+                    <input type="text" id="expenseDate" required readonly>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method *</label>
+                    <select id="paymentMethod" required>
+                        <option value="">Select Payment Method</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Credit Card">Credit Card</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expenseNotes">Notes</label>
+                    <textarea id="expenseNotes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Expense</button>
+                    <button type="button" class="btn-secondary close-modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Ticket Modal -->
+    <div id="editTicketModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Ticket Status</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="editTicketForm">
+                <input type="hidden" id="editTicketId">
+                <div class="form-group">
+                    <label for="editTicketStatus">Status:</label>
+                    <select id="editTicketStatus" required>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="expenses.js"></script>
+</body>
+</html> 

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>TEMS</h2>
+                <p>Ticketing & Expense Management</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="tickets.html" data-page="tickets"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
+                <li><a href="expenses.html" data-page="expenses"><i class="fas fa-receipt"></i> Expenses</a></li>
+                <li><a href="reports.html" data-page="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a href="settings.html" data-page="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="#" class="active" data-page="users"><i class="fas fa-users"></i> Users</a></li>
+            </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="username">Loading...</span>
+                        <button id="logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <h1>Users</h1>
+                    <p class="date">Today: <span id="currentDate"></span></p>
+                </div>
+            </header>
+
+            <div class="users-list">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- User rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- User Modal -->
+            <div id="userModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-modal">&times;</button>
+                    <h2>Edit User</h2>
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="form-group">
+                            <label for="userName">Name</label>
+                            <input type="text" id="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userEmail">Email</label>
+                            <input type="email" id="userEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole">Role</label>
+                            <select id="userRole" required>
+                                <option value="superadmin">Super Admin</option>
+                                <option value="admin">Admin</option>
+                                <option value="user">User</option>
+                            </select>
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="users.js"></script>
+</body>
+</html> 
