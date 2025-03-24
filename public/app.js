@@ -57,12 +57,20 @@ function setupEventListeners(elements) {
     // Navigation
     if (elements.navLinks) {
         elements.navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = e.target.closest('a').dataset.page;
-            navigateToPage(page);
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.target.closest('a').dataset.page;
+                if (page) {
+                    navigateToPage(page);
+                } else {
+                    // Handle direct href links
+                    const href = e.target.closest('a').getAttribute('href');
+                    if (href) {
+                        window.location.href = href;
+                    }
+                }
+            });
         });
-    });
     }
 
     // Forms

@@ -176,7 +176,12 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    window.location.href = '/';
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        errorMessage.textContent = 'Server error: No redirect URL provided';
+                        errorMessage.style.display = 'block';
+                    }
                 } else {
                     errorMessage.textContent = data.error || 'Login failed';
                     errorMessage.style.display = 'block';

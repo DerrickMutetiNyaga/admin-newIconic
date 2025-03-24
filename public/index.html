@@ -42,8 +42,7 @@
                 <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="#" data-page="tickets"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
                 <li><a href="#" data-page="expenses"><i class="fas fa-receipt"></i> Expenses</a></li>
-                <li><a href="#" data-page="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
-                <li><a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                <li id="approvalsLink" style="display: none;"><a href="approvals.html"><i class="fas fa-users-cog"></i> User Management</a></li>
             </ul>
             <div class="user-profile">
                 <div class="user-info">
@@ -360,5 +359,57 @@
 
             <!-- Scripts -->
             <script src="app.js"></script>
+
+            <script>
+                // Function to check user role and apply restrictions
+                async function checkUserRoleAndApplyRestrictions() {
+                    try {
+                        const response = await fetch('/api/auth/check', {
+                            credentials: 'include'
+                        });
+                        const data = await response.json();
+                        
+                        // Update username with role indicator
+                        const usernameElement = document.getElementById('username');
+                        const approvalsLink = document.getElementById('approvalsLink');
+                        
+                        if (data.role === 'staff') {
+                            // Staff restrictions
+                            const expensesLink = document.querySelector('a[data-page="expenses"]');
+                            if (expensesLink) {
+                                expensesLink.parentElement.style.display = 'none';
+                            }
+
+                            if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                                usernameElement.textContent = `${data.username} (Staff)`;
+                            }
+                        } else if (data.role === 'admin') {
+                            if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                                usernameElement.textContent = `${data.username} (Admin)`;
+                            }
+                        } else if (data.role === 'superadmin') {
+                            if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                                usernameElement.textContent = `${data.username} (Superadmin)`;
+                            }
+                            
+                            // Show approvals link for superadmin
+                            if (approvalsLink) {
+                                approvalsLink.style.display = 'block';
+                            }
+
+                            // Update logo text
+                            const logoText = document.querySelector('.logo p');
+                            if (logoText) {
+                                logoText.textContent = 'Admin Portal';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error checking user role:', error);
+                    }
+                }
+
+                // Call the function when the page loads
+                document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
+            </script>
 </body>
 </html> 

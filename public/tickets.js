@@ -39,10 +39,47 @@ const elements = {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Check authentication
-        const response = await fetch('/api/auth/check');
+        const response = await fetch('/api/auth/check', {
+            credentials: 'include'
+        });
+        
         if (!response.ok) {
             window.location.href = '/login.html';
             return;
+        }
+
+        const data = await response.json();
+        if (!data.authenticated) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        // Update username
+        const usernameElement = document.getElementById('username');
+        if (usernameElement) {
+            usernameElement.textContent = data.username || 'User';
+        }
+
+        // Add logout handler
+        const logoutButton = document.getElementById('logout');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        window.location.href = '/login.html';
+                    } else {
+                        throw new Error('Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showNotification('Logout failed. Please try again.', 'error');
+                }
+            });
         }
 
         // Hide loading overlay and show content
@@ -63,11 +100,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Update current date
         updateCurrentDate();
+
+        // Apply role-based restrictions
+        await checkUserRoleAndApplyRestrictions();
     } catch (error) {
         console.error('Error initializing page:', error);
         showNotification('Error loading page. Please try again.', 'error');
     }
 });
+
+// Function to check user role and apply restrictions
+async function checkUserRoleAndApplyRestrictions() {
+    try {
+        const response = await fetch('/api/auth/check', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.role === 'staff') {
+            // Hide expenses link
+            const expensesLink = document.querySelector('a[href="expenses.html"]');
+            if (expensesLink) {
+                expensesLink.parentElement.style.display = 'none';
+            }
+
+            // Hide dashboard link
+            const dashboardLink = document.querySelector('a[href="index.html"]');
+            if (dashboardLink) {
+                dashboardLink.parentElement.style.display = 'none';
+            }
+
+            // Add staff indicator
+            const usernameElement = document.getElementById('username');
+            if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                usernameElement.textContent = `${usernameElement.textContent} (Staff)`;
+            }
+
+            // Hide delete buttons for tickets
+            document.querySelectorAll('.ticket-action-btn.delete').forEach(btn => {
+                btn.style.display = 'none';
+            });
+        }
+    } catch (error) {
+        console.error('Error checking user role:', error);
+    }
+}
 
 // Initialize date pickers
 function initializeDatePickers() {
@@ -221,6 +298,12 @@ function setupEventListeners() {
             elements.customDateRange.value = '';
         }
     });
+
+    // Add event listener for status change
+    document.getElementById('editTicketStatus').addEventListener('change', function() {
+        const problemCorrectedGroup = document.getElementById('problemCorrectedGroup');
+        problemCorrectedGroup.style.display = this.value === 'Resolved' ? 'block' : 'none';
+    });
 }
 
 // Load tickets from API
@@ -314,20 +397,25 @@ function displayTickets() {
                         <div class="client-detail-item">
                             <i class="fas fa-home"></i>
                             <span>${ticket.houseNumber}</span>
-            </div>
-        </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="ticket-category">
                     <i class="fas fa-tag"></i> ${ticket.category}
                 </div>
                 <div class="ticket-description">
-                    ${ticket.problemDescription}
+                    <strong>Problem:</strong> ${ticket.problemDescription}
                 </div>
+                ${ticket.problemCorrected ? `
+                <div class="ticket-solution">
+                    <strong>Solution:</strong> ${ticket.problemCorrected}
+                </div>
+                ` : ''}
             </div>
             <div class="ticket-footer">
                 <div class="ticket-date">
                     <i class="far fa-clock"></i> ${formatDate(ticket.reportedDateTime)}
-            </div>
+                </div>
                 <div class="ticket-actions">
                     <button class="ticket-action-btn edit" onclick="editTicket('${ticket._id}')">
                         <i class="fas fa-edit"></i> Edit
@@ -335,7 +423,7 @@ function displayTickets() {
                     <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
                         <i class="fas fa-trash"></i> Delete
                     </button>
-            </div>
+                </div>
             </div>
         </div>
     `).join('');
@@ -452,6 +540,7 @@ async function handleTicketEdit(e) {
     
     const ticketId = document.getElementById('editTicketId').value;
     const status = document.getElementById('editTicketStatus').value;
+    const problemCorrected = document.getElementById('problemCorrected').value;
 
     try {
         const response = await fetch(`/api/tickets/${ticketId}`, {
@@ -459,10 +548,16 @@ async function handleTicketEdit(e) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ 
+                status,
+                problemCorrected: status === 'Resolved' ? problemCorrected : undefined
+            })
         });
 
-        if (!response.ok) throw new Error('Failed to update ticket');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update ticket');
+        }
 
         const updatedTicket = await response.json();
         const index = allTickets.findIndex(t => t._id === ticketId);
@@ -482,7 +577,7 @@ async function handleTicketEdit(e) {
         showNotification('Ticket updated successfully!');
     } catch (error) {
         console.error('Error updating ticket:', error);
-        showNotification('Error updating ticket. Please try again.', 'error');
+        showNotification(error.message || 'Error updating ticket. Please try again.', 'error');
     }
 }
 
@@ -495,6 +590,11 @@ async function editTicket(ticketId) {
         const ticket = await response.json();
         document.getElementById('editTicketId').value = ticket._id;
         document.getElementById('editTicketStatus').value = ticket.status;
+        document.getElementById('problemCorrected').value = ticket.problemCorrected || '';
+        
+        // Show/hide problem corrected field based on status
+        const problemCorrectedGroup = document.getElementById('problemCorrectedGroup');
+        problemCorrectedGroup.style.display = ticket.status === 'Resolved' ? 'block' : 'none';
         
         showModal('editTicketModal');
     } catch (error) {

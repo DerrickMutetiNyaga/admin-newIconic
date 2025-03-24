@@ -7,6 +7,7 @@ const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const XLSX = require('xlsx');
 const ticketsRouter = require('./routes/tickets');
+const usersRouter = require('./routes/users');
 
 const app = express();
 
@@ -39,12 +40,102 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
+// Role-based access middleware
+const enforceRoleAccess = (req, res, next) => {
+    const userRole = req.session.userRole?.toLowerCase();
+
+    if (userRole === 'staff') {
+        // Staff restrictions
+        const allowedPaths = [
+            '/tickets.html',
+            '/api/tickets',
+            '/api/auth/logout',
+            '/api/auth/check',
+            '/login.html'
+        ];
+
+        const isAllowedPath = allowedPaths.some(path => req.path.startsWith(path));
+        
+        if (req.method === 'POST' && req.path === '/api/tickets') {
+            return next();
+        }
+
+        if (req.method === 'DELETE' && req.path.startsWith('/api/tickets')) {
+            return res.status(403).json({ error: 'Staff members cannot delete tickets' });
+        }
+
+        if (!isAllowedPath) {
+            if (req.xhr || req.path.startsWith('/api/')) {
+                return res.status(403).json({ error: 'Access denied' });
+            }
+            return res.redirect('/tickets.html');
+        }
+    } else if (userRole === 'admin') {
+        // Admin restrictions
+        const allowedPaths = [
+            '/',
+            '/index.html',
+            '/tickets.html',
+            '/expenses.html',
+            '/api/tickets',
+            '/api/expenses',
+            '/api/dashboard/stats',
+            '/api/auth/logout',
+            '/api/auth/check',
+            '/login.html',
+            '/styles.css',
+            '/app.js',
+            '/mobile-nav.js',
+            '/chart.js',
+            '/flatpickr',
+            '/cdnjs',
+            '/cdn.jsdelivr.net',
+            '/fonts'
+        ];
+
+        // Check if the path starts with any of the allowed paths or contains CDN resources
+        const isAllowedPath = allowedPaths.some(path => req.path.startsWith(path)) ||
+            req.path.includes('chart.js') ||
+            req.path.includes('flatpickr') ||
+            req.path.includes('cdn') ||
+            req.path.includes('fonts');
+
+        if (!isAllowedPath) {
+            if (req.xhr || req.path.startsWith('/api/')) {
+                return res.status(403).json({ error: 'Access denied' });
+            }
+            return res.redirect('/index.html');
+        }
+    }
+    next();
+};
+
+// Add the middleware to your app
+app.use(enforceRoleAccess);
+
 // Routes
 app.get('/', (req, res) => {
     if (!req.session.userId) {
         res.redirect('/login.html');
     } else {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        // Check user role and redirect accordingly
+        const userRole = req.session.userRole?.toLowerCase();
+        console.log('Root route - User role:', userRole);
+        
+        switch (userRole) {
+            case 'user':
+                res.redirect('/blank.html');
+                break;
+            case 'admin':
+                res.redirect('/tickets.html');
+                break;
+            case 'superadmin':
+                res.sendFile(path.join(__dirname, 'public', 'index.html'));
+                break;
+            default:
+                console.log('Unknown role, redirecting to blank.html');
+                res.redirect('/blank.html');
+        }
     }
 });
 
@@ -111,24 +202,73 @@ app.post('/api/auth/signup', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+        console.log('Login attempt for username:', username);
+
         const user = await User.findOne({ username });
+        console.log('Found user:', user ? 'Yes' : 'No');
 
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const isMatch = await user.comparePassword(password);
+        console.log('Password match:', isMatch);
+
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        // Set session data
         req.session.userId = user._id;
         req.session.username = user.username;
         req.session.userRole = user.role;
-        res.json({ 
-            success: true, 
+
+        // Debug logging
+        console.log('User details:', {
+            id: user._id,
             username: user.username,
-            role: user.role 
+            role: user.role,
+            roleType: typeof user.role
+        });
+
+        // Determine redirect URL based on role
+        let redirectUrl;
+        const userRole = user.role.toLowerCase();
+        console.log('Processing role:', userRole);
+
+        switch (userRole) {
+            case 'user':
+                redirectUrl = '/blank.html';
+                break;
+            case 'staff':
+                redirectUrl = '/tickets.html';
+                break;
+            case 'admin':
+                redirectUrl = '/tickets.html';
+                break;
+            case 'superadmin':
+                redirectUrl = '/';
+                break;
+            default:
+                console.log('Unknown role, defaulting to blank.html');
+                redirectUrl = '/blank.html';
+        }
+
+        console.log('Final redirect URL:', redirectUrl);
+
+        // Save session before sending response
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'Session error' });
+            }
+            
+            res.json({ 
+                success: true, 
+                username: user.username,
+                role: user.role,
+                redirectUrl: redirectUrl
+            });
         });
     } catch (error) {
         console.error('Login error:', error);
@@ -143,6 +283,7 @@ app.post('/api/auth/logout', (req, res) => {
 
 // API Routes
 app.use('/api/tickets', ticketsRouter);
+app.use('/api/users', usersRouter);
 
 // Excel Export endpoint
 app.get('/api/tickets/export', requireAuth, async (req, res) => {
@@ -426,19 +567,20 @@ app.delete('/api/expenses/:id', requireAuth, async (req, res) => {
 // Dashboard Stats API
 app.get('/api/dashboard/stats', requireAuth, async (req, res) => {
     try {
+        console.log('Fetching dashboard stats...');
         const [tickets, expenses] = await Promise.all([
             Ticket.find().sort({ createdAt: -1 }),
             Expense.find()
         ]);
 
+        console.log(`Found ${tickets.length} tickets and ${expenses.length} expenses`);
+
         // Group tickets by station
         const ticketsByStation = {
-            'Gilgil': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
-            'Naivasha': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
-            'Muranga': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
-            'Prof': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
-            'Exec': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
-            'Married': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } }
+            'NYS GILGI': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
+            'NYS NAIVASHA': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
+            'MARRIEDQUARTERS': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } },
+            '5KRMAIN CAMP': { total: 0, open: 0, inProgress: 0, resolved: 0, tickets: [], categories: { Installation: 0, LOS: 0, Other: 0 } }
         };
 
         // Sort tickets to show open tickets first
@@ -450,11 +592,14 @@ app.get('/api/dashboard/stats', requireAuth, async (req, res) => {
 
         // Group tickets by station
         sortedTickets.forEach(ticket => {
-            if (ticketsByStation[ticket.stationLocation]) {
-                ticketsByStation[ticket.stationLocation].total++;
-                ticketsByStation[ticket.stationLocation][ticket.status.toLowerCase().replace(' ', '')]++;
-                ticketsByStation[ticket.stationLocation].tickets.push(ticket);
-                ticketsByStation[ticket.stationLocation].categories[ticket.category]++;
+            const station = ticketsByStation[ticket.stationLocation];
+            if (station) {
+                station.total++;
+                station[ticket.status.toLowerCase().replace(' ', '')]++;
+                station.tickets.push(ticket);
+                station.categories[ticket.category]++;
+            } else {
+                console.warn('Unknown station:', ticket.stationLocation);
             }
         });
 
@@ -471,9 +616,11 @@ app.get('/api/dashboard/stats', requireAuth, async (req, res) => {
             recentExpenses: expenses.slice(0, 15)
         };
 
+        console.log('Dashboard stats compiled successfully');
         res.json(stats);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Error fetching dashboard stats:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard stats', details: error.message });
     }
 });
 

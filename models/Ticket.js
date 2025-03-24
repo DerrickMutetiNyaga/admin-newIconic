@@ -23,6 +23,12 @@ const ticketSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    problemCorrected: {
+        type: String,
+        required: function() {
+            return this.status === 'Resolved';
+        }
+    },
     reportedDateTime: {
         type: Date,
         default: Date.now

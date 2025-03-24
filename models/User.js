@@ -6,31 +6,34 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        trim: true,
-        minlength: 3
+        trim: true
     },
     email: {
         type: String,
         required: true,
         unique: true,
         trim: true,
-        lowercase: true,
-        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+        lowercase: true
     },
     password: {
         type: String,
-        required: true,
-        minlength: 6
+        required: true
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'staff', 'admin', 'superadmin'],
         default: 'user'
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    status: {
+        type: String,
+        enum: ['active', 'pending', 'inactive'],
+        default: 'pending'
+    },
+    lastLogin: {
+        type: Date
+    },
+    passwordResetToken: String,
+    passwordResetExpires: Date
 }, {
     timestamps: true
 });
@@ -48,7 +51,7 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// Method to compare password
+// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
     try {
         return await bcrypt.compare(candidatePassword, this.password);

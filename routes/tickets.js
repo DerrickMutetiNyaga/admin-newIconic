@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Ticket = require('../models/Ticket');
 const XLSX = require('xlsx');
+const { sendSMS } = require('../utils/sms');
 
 // Authentication Middleware
 const requireAuth = (req, res, next) => {
@@ -199,6 +200,13 @@ router.post('/', requireAuth, async (req, res) => {
     try {
         const ticket = new Ticket(req.body);
         await ticket.save();
+
+        // Send SMS notification
+        const phoneNumbers = process.env.PHONE_NUMBERS;
+        const message = `New ticket created:\nClient: ${ticket.clientName}\nLocation: ${ticket.stationLocation}\nHouse: ${ticket.houseNumber}\nCategory: ${ticket.category}\nStatus: ${ticket.status}`;
+        
+        await sendSMS(phoneNumbers, message);
+
         res.status(201).json(ticket);
     } catch (error) {
         console.error('Error creating ticket:', error);

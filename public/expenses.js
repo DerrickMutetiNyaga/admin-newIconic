@@ -190,9 +190,10 @@ function initializeCharts() {
             datasets: [{
                 label: 'Expense Trend',
                 data: [],
-                borderColor: '#4BC0C0',
+                borderColor: '#2ecc71',
+                backgroundColor: 'rgba(46, 204, 113, 0.1)',
                 tension: 0.1,
-                fill: false
+                fill: true
             }]
         },
         options: {
