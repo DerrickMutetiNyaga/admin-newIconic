@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
@@ -26,11 +27,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Session configuration
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+// Models
+const Ticket = require('./models/Ticket');
+const Expense = require('./models/Expense');
+const User = require('./models/User');
+
+// Session configuration with MongoDB store
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        ttl: 24 * 60 * 60 // Session TTL (1 day)
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
@@ -54,16 +69,6 @@ app.get('/check-session', (req, res) => {
         headers: req.headers
     });
 });
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
-// Models
-const Ticket = require('./models/Ticket');
-const Expense = require('./models/Expense');
-const User = require('./models/User');
 
 // Authentication Middleware
 const requireAuth = (req, res, next) => {
