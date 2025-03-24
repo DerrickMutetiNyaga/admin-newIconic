@@ -195,22 +195,40 @@ router.get('/', requireAuth, async (req, res) => {
     }
 });
 
-// Create a new ticket
+// Create new ticket
 router.post('/', requireAuth, async (req, res) => {
     try {
         const ticket = new Ticket(req.body);
-        await ticket.save();
+        const savedTicket = await ticket.save();
 
-        // Send SMS notification
-        const phoneNumbers = process.env.PHONE_NUMBERS;
-        const message = `New ticket created:\nClient: ${ticket.clientName}\nLocation: ${ticket.stationLocation}\nHouse: ${ticket.houseNumber}\nCategory: ${ticket.category}\nStatus: ${ticket.status}`;
+        // Get support numbers from environment variable
+        const supportNumbers = process.env.PHONE_NUMBERS.split(',').map(num => num.trim());
         
-        await sendSMS(phoneNumbers, message);
+        // Send notification to support numbers
+        const supportMessage = `New Ticket Alert: #${savedTicket._id.toString().slice(-6)}\nClient: ${savedTicket.clientName} (${savedTicket.clientNumber})\nLocation: ${savedTicket.stationLocation}, House: ${savedTicket.houseNumber}\nCategory: ${savedTicket.category}\nProblem: ${savedTicket.problemDescription}`;
+        
+        for (const supportNumber of supportNumbers) {
+            await sendSMS(supportMessage, supportNumber);
+        }
 
-        res.status(201).json(ticket);
+        // Format client's phone number (remove any non-digit characters and ensure it starts with country code)
+        let clientNumber = savedTicket.clientNumber.replace(/\D/g, '');
+        if (!clientNumber.startsWith('254')) {
+            clientNumber = '254' + clientNumber.replace(/^0+/, '');
+        }
+
+        // Send confirmation to client
+        const clientMessage = `Dear ${savedTicket.clientName},\n\nThank you for reporting your issue. We have received your ticket #${savedTicket._id.toString().slice(-6)} and will address it within 48 hours.\n\nFor further enquiries, please contact our customer care line: +254746089137\n\nBest regards,\nIconic Support Team`;
+        
+        await sendSMS(clientMessage, clientNumber);
+
+        res.status(201).json(savedTicket);
     } catch (error) {
         console.error('Error creating ticket:', error);
-        res.status(500).json({ error: 'Failed to create ticket' });
+        res.status(400).json({ 
+            error: 'Failed to create ticket',
+            details: error.message 
+        });
     }
 });
 

@@ -388,7 +388,9 @@ function displayTickets() {
                     <div class="client-details">
                         <div class="client-detail-item">
                             <i class="fas fa-phone"></i>
-                            <span>${ticket.clientNumber}</span>
+                            <a href="tel:${ticket.clientNumber}" class="phone-link">
+                                <span>${ticket.clientNumber}</span>
+                            </a>
                         </div>
                         <div class="client-detail-item">
                             <i class="fas fa-map-marker-alt"></i>
@@ -513,13 +515,16 @@ async function handleTicketSubmit(e) {
             body: JSON.stringify(formData)
         });
 
-        if (!response.ok) throw new Error('Failed to create ticket');
+        const data = await response.json();
 
-        const newTicket = await response.json();
-        allTickets.unshift(newTicket);
+        if (!response.ok) {
+            throw new Error(data.error || data.details || 'Failed to create ticket');
+        }
+
+        allTickets.unshift(data);
         filteredTickets = [...allTickets];
         
-            closeModal('ticketModal');
+        closeModal('ticketModal');
         elements.ticketForm.reset();
         
         displayTickets();
@@ -530,7 +535,7 @@ async function handleTicketSubmit(e) {
         showNotification('Ticket created successfully!');
     } catch (error) {
         console.error('Error creating ticket:', error);
-        showNotification('Error creating ticket. Please try again.', 'error');
+        showNotification(error.message || 'Error creating ticket. Please try again.', 'error');
     }
 }
 

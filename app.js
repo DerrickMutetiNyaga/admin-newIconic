@@ -8,10 +8,14 @@ const bcrypt = require('bcryptjs');
 const XLSX = require('xlsx');
 const ticketsRouter = require('./routes/tickets');
 const usersRouter = require('./routes/users');
+const { startScheduler } = require('./utils/scheduler');
+const { checkAndSendFollowUps } = require('./utils/followUpService');
+const cors = require('cors');
 
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -19,7 +23,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Set to true if using HTTPS
+    cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 // MongoDB Connection
@@ -661,6 +665,15 @@ async function sendSMS(phoneNumber, message) {
         throw error;
     }
 }
+
+// Start the follow-up scheduler
+startScheduler();
+
+// Schedule follow-up checks to run every hour
+setInterval(checkAndSendFollowUps, 60 * 60 * 1000);
+
+// Initial follow-up check
+checkAndSendFollowUps();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

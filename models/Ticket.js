@@ -42,6 +42,14 @@ const ticketSchema = new mongoose.Schema({
         type: String,
         enum: ['Installation', 'LOS', 'Other'],
         required: true
+    },
+    followUpSent: {
+        type: Boolean,
+        default: false
+    },
+    lastFollowUpSent: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true

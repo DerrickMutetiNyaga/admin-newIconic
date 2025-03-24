@@ -127,6 +127,25 @@
             color: #999;
         }
 
+        .phone-link {
+            text-decoration: none;
+            color: #3498db;
+            transition: all 0.2s ease;
+        }
+
+        .phone-link:hover {
+            color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .phone-link span {
+            border-bottom: 1px dashed #3498db;
+        }
+
+        .phone-link:hover span {
+            border-bottom-style: solid;
+        }
+
         .ticket-category {
             display: inline-block;
             padding: 4px 8px;
@@ -697,6 +716,69 @@
             display: block;
             margin-bottom: 5px;
         }
+
+        /* Custom sidebar styles for tickets.html */
+        .sidebar {
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+            color: white;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar .nav-links a {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+        }
+        
+        .sidebar .logo h2 {
+            color: white;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+        
+        .sidebar .logo p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        
+        .sidebar .user-profile {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 15px;
+        }
+        
+        .sidebar .logout-btn {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .logout-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .sidebar .nav-links i {
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+        }
     </style>
 </head>
 <body>
@@ -708,7 +790,7 @@
     <div class="container">
         <nav class="sidebar">
             <div class="logo">
-                <h2>TEMS</h2>
+                <h2>ICONIC</h2>
                 <p>Ticketing & Expense Management</p>
             </div>
             <ul class="nav-links">

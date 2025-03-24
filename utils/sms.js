@@ -1,50 +1,32 @@
 const axios = require('axios');
-const qs = require('querystring');
 
-const sendSMS = async (phoneNumbers, message) => {
+async function sendSMS(message, phoneNumber) {
     try {
-        const username = process.env.ZETTATEL_USERNAME;
-        const password = process.env.ZETTATEL_PASSWORD;
-        const senderId = process.env.SENDER_ID;
+        const formData = new URLSearchParams();
+        formData.append('userid', process.env.ZETTATEL_USERNAME);
+        formData.append('password', encodeURIComponent(process.env.ZETTATEL_PASSWORD));
+        formData.append('sendMethod', 'quick');
+        formData.append('mobile', phoneNumber);
+        formData.append('msg', message);
+        formData.append('senderid', process.env.SENDER_ID);
+        formData.append('msgType', 'text');
+        formData.append('duplicatecheck', 'true');
+        formData.append('output', 'json');
 
-        // Split phone numbers if multiple are provided
-        const numbers = phoneNumbers.split(',').map(num => num.trim());
-
-        // Send SMS to each number
-        for (const number of numbers) {
-            const data = {
-                userid: username,
-                password: password,
-                sendMethod: 'quick',
-                mobile: number,
-                msg: message,
-                senderid: senderId,
-                msgType: 'text',
-                duplicatecheck: 'true',
-                output: 'json'
-            };
-
-            const response = await axios.post('https://portal.zettatel.com/SMSApi/send', 
-                qs.stringify(data),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                }
-            );
-
-            if (response.data.status !== 'success') {
-                console.error(`Failed to send SMS to ${number}:`, response.data);
-            } else {
-                console.log(`SMS sent successfully to ${number}:`, response.data);
+        const response = await axios.post(process.env.ZETTATEL_API_URL, formData, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
-        }
+        });
 
-        return true;
+        console.log(`SMS sent to ${phoneNumber}:`, response.data);
+        return response.data;
     } catch (error) {
-        console.error('Error sending SMS:', error);
-        return false;
+        console.error(`Error sending SMS to ${phoneNumber}:`, error.response ? error.response.data : error.message);
+        throw error;
     }
-};
+}
 
-module.exports = { sendSMS }; 
+module.exports = {
+    sendSMS
+}; 
