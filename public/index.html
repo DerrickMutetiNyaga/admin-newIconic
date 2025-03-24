@@ -92,93 +92,10 @@
         .sidebar .nav-links i {
             filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
         }
-
-        /* Login form styles */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #1a472a, #2d8659);
-        }
-
-        .login-form {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-form h2 {
-            color: #1a472a;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 1rem;
-            background: #1a472a;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .login-btn:hover {
-            background: #2d8659;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 1rem;
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <!-- Login Form -->
-    <div class="login-container" id="loginContainer">
-        <form class="login-form" id="loginForm">
-            <h2>ICONIC Support System</h2>
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="login-btn">Login</button>
-            <div class="error-message" id="loginError"></div>
-        </form>
-    </div>
-
-    <!-- Main Container -->
-    <div class="container" id="mainContainer" style="display: none;">
+    <div class="container">
         <nav class="sidebar">
             <div class="logo">
                 <h2>ICONIC</h2>
@@ -324,388 +241,238 @@
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Edit Ticket Modal -->
-    <div id="editTicketModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Update Ticket Status</h2>
-                <button class="close-modal">&times;</button>
             </div>
-            <form id="editTicketForm">
-                <input type="hidden" id="editTicketId">
-                <div class="form-group">
-                    <label for="editTicketStatus">Status:</label>
-                    <select id="editTicketStatus" required>
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Resolved">Resolved</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Update Status</button>
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Edit Expense Modal -->
-    <div id="editExpenseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Expense</h2>
-                <button class="close-modal">&times;</button>
+            <!-- Edit Ticket Modal -->
+            <div id="editTicketModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Update Ticket Status</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="editTicketForm">
+                        <input type="hidden" id="editTicketId">
+                        <div class="form-group">
+                            <label for="editTicketStatus">Status:</label>
+                            <select id="editTicketStatus" required>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Status</button>
+                            <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <form id="editExpenseForm">
-                <input type="hidden" id="editExpenseId">
-                <div class="form-group">
-                    <label for="editExpenseName">Expense Name *</label>
-                    <input type="text" id="editExpenseName" required placeholder="Enter expense name">
-                </div>
-                <div class="form-group">
-                    <label for="editExpenseCategory">Category *</label>
-                    <select id="editExpenseCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="Salaries">Salaries</option>
-                        <option value="Equipment">Equipment</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Others">Others</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editExpenseAmount">Amount (KES) *</label>
-                    <input type="number" id="editExpenseAmount" required placeholder="Enter amount in KES">
-                </div>
-                <div class="form-group">
-                    <label for="editExpenseDate">Date and Time *</label>
-                    <input type="datetime-local" id="editExpenseDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="editExpensePaymentMethod">Payment Method *</label>
-                    <select id="editExpensePaymentMethod" required>
-                        <option value="">Select Payment Method</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Mobile Money">Mobile Money</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editExpenseNotes">Notes</label>
-                    <textarea id="editExpenseNotes" placeholder="Enter any additional notes"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('editExpenseModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Update Expense</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Ticket Modal -->
-    <div id="ticketModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create A Ticket</h2>
-                <button class="close-modal">&times;</button>
+            <!-- Edit Expense Modal -->
+            <div id="editExpenseModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Edit Expense</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="editExpenseForm">
+                        <input type="hidden" id="editExpenseId">
+                        <div class="form-group">
+                            <label for="editExpenseName">Expense Name *</label>
+                            <input type="text" id="editExpenseName" required placeholder="Enter expense name">
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseCategory">Category *</label>
+                            <select id="editExpenseCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Salaries">Salaries</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseAmount">Amount (KES) *</label>
+                            <input type="number" id="editExpenseAmount" required placeholder="Enter amount in KES">
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseDate">Date and Time *</label>
+                            <input type="datetime-local" id="editExpenseDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpensePaymentMethod">Payment Method *</label>
+                            <select id="editExpensePaymentMethod" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseNotes">Notes</label>
+                            <textarea id="editExpenseNotes" placeholder="Enter any additional notes"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="closeModal('editExpenseModal')">Cancel</button>
+                            <button type="submit" class="btn-primary">Update Expense</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <form id="ticketForm">
-                <div class="form-group">
-                    <label for="clientName">Client Name *</label>
-                    <input type="text" id="clientName" required placeholder="Enter client name">
-                </div>
-                <div class="form-group">
-                    <label for="clientNumber">Client Number *</label>
-                    <input type="tel" id="clientNumber" required placeholder="Enter client number">
-                </div>
-                <div class="form-group">
-                    <label for="stationLocation">Station/Location *</label>
-                    <select id="stationLocation" required>
-                        <option value="">Select a station</option>
-                        <option value="Gilgil">Gilgil</option>
-                        <option value="Naivasha">Naivasha</option>
-                        <option value="Muranga">Muranga</option>
-                        <option value="Prof">Prof</option>
-                        <option value="Exec Married">Exec Married</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="houseNumber">House Number/Barrack Name *</label>
-                    <input type="text" id="houseNumber" required placeholder="Enter house number">
-                </div>
-                <div class="form-group">
-                    <label for="problemDescription">Problem Being Experienced *</label>
-                    <textarea id="problemDescription" required placeholder="Describe the problem"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="reportedDateTime">Date and Time Problem Reported</label>
-                    <input type="datetime-local" id="reportedDateTime">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Create Ticket</button>
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Expense Form Modal -->
-    <div id="expenseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Expense</h2>
-                <button class="close-modal">&times;</button>
+            <!-- Ticket Modal -->
+            <div id="ticketModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Create A Ticket</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="ticketForm">
+                        <div class="form-group">
+                            <label for="clientName">Client Name *</label>
+                            <input type="text" id="clientName" required placeholder="Enter client name">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientNumber">Client Number *</label>
+                            <input type="tel" id="clientNumber" required placeholder="Enter client number">
+                        </div>
+                        <div class="form-group">
+                            <label for="stationLocation">Station/Location *</label>
+                            <select id="stationLocation" required>
+                                <option value="">Select a station</option>
+                                <option value="Gilgil">Gilgil</option>
+                                <option value="Naivasha">Naivasha</option>
+                                <option value="Muranga">Muranga</option>
+                                <option value="Prof">Prof</option>
+                                <option value="Exec Married">Exec Married</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="houseNumber">House Number/Barrack Name *</label>
+                            <input type="text" id="houseNumber" required placeholder="Enter house number">
+                        </div>
+                        <div class="form-group">
+                            <label for="problemDescription">Problem Being Experienced *</label>
+                            <textarea id="problemDescription" required placeholder="Describe the problem"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportedDateTime">Date and Time Problem Reported</label>
+                            <input type="datetime-local" id="reportedDateTime">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create Ticket</button>
+                            <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <form id="expenseForm">
-                <div class="form-group">
-                    <label for="expenseName">Expense Name *</label>
-                    <input type="text" id="expenseName" required placeholder="Enter expense name">
-                </div>
-                <div class="form-group">
-                    <label for="expenseCategory">Category *</label>
-                    <select id="expenseCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="Salaries">Salaries</option>
-                        <option value="Equipment">Equipment</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Others">Others</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="expenseAmount">Amount (KES) *</label>
-                    <input type="number" id="expenseAmount" required placeholder="Enter amount in KES">
-                </div>
-                <div class="form-group">
-                    <label for="expenseDate">Date and Time *</label>
-                    <input type="datetime-local" id="expenseDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="expensePaymentMethod">Payment Method *</label>
-                    <select id="expensePaymentMethod" required>
-                        <option value="">Select Payment Method</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Mobile Money">Mobile Money</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="expenseNotes">Notes</label>
-                    <textarea id="expenseNotes" placeholder="Enter any additional notes"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Expense</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Scripts -->
-    <script src="app.js"></script>
+            <!-- Expense Form Modal -->
+            <div id="expenseModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add New Expense</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="expenseForm">
+                        <div class="form-group">
+                            <label for="expenseName">Expense Name *</label>
+                            <input type="text" id="expenseName" required placeholder="Enter expense name">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseCategory">Category *</label>
+                            <select id="expenseCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Salaries">Salaries</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseAmount">Amount (KES) *</label>
+                            <input type="number" id="expenseAmount" required placeholder="Enter amount in KES">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseDate">Date and Time *</label>
+                            <input type="datetime-local" id="expenseDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expensePaymentMethod">Payment Method *</label>
+                            <select id="expensePaymentMethod" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseNotes">Notes</label>
+                            <textarea id="expenseNotes" placeholder="Enter any additional notes"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Expense</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-    <script>
-        // Login handling
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginError = document.getElementById('loginError');
+            <!-- Scripts -->
+            <script src="app.js"></script>
 
-            try {
-                console.log('Attempting login...');
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password }),
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-                console.log('Login response:', data);
-
-                if (response.ok) {
-                    console.log('Login successful, checking session...');
-                    // Verify session is active
-                    const sessionCheck = await fetch('/api/auth/me', {
-                        credentials: 'include'
-                    });
-
-                    if (sessionCheck.ok) {
-                        console.log('Session verified, updating UI...');
-                        const sessionData = await sessionCheck.json();
+            <script>
+                // Function to check user role and apply restrictions
+                async function checkUserRoleAndApplyRestrictions() {
+                    try {
+                        const response = await fetch('/api/auth/check', {
+                            credentials: 'include'
+                        });
+                        const data = await response.json();
                         
-                        // Hide login form and show main container
-                        document.getElementById('loginContainer').style.display = 'none';
-                        document.getElementById('mainContainer').style.display = 'flex';
-                        
-                        // Update username display
-                        const usernameDisplay = document.querySelector('.user-details #username');
-                        if (usernameDisplay) {
-                            usernameDisplay.textContent = sessionData.username || data.username;
-                        }
-                        
-                        // Show/hide approvals link based on role
+                        // Update username with role indicator
+                        const usernameElement = document.getElementById('username');
                         const approvalsLink = document.getElementById('approvalsLink');
-                        if (sessionData.role === 'superadmin' || data.role === 'superadmin') {
-                            approvalsLink.style.display = 'block';
-                        } else {
-                            approvalsLink.style.display = 'none';
+                        
+                        if (data.role === 'staff') {
+                            // Staff restrictions
+                            const expensesLink = document.querySelector('a[data-page="expenses"]');
+                            if (expensesLink) {
+                                expensesLink.parentElement.style.display = 'none';
+                            }
+
+                            if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                                usernameElement.textContent = `${data.username} (Staff)`;
+                            }
+                        } else if (data.role === 'admin') {
+                            if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                                usernameElement.textContent = `${data.username} (Admin)`;
+                            }
+                        } else if (data.role === 'superadmin') {
+                            if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                                usernameElement.textContent = `${data.username} (Superadmin)`;
+                            }
+                            
+                            // Show approvals link for superadmin
+                            if (approvalsLink) {
+                                approvalsLink.style.display = 'block';
+                            }
+
+                            // Update logo text
+                            const logoText = document.querySelector('.logo p');
+                            if (logoText) {
+                                logoText.textContent = 'Admin Portal';
+                            }
                         }
-
-                        // Load initial data
-                        loadDashboardData();
-                    } else {
-                        console.error('Session verification failed');
-                        loginError.textContent = 'Session error. Please try again.';
-                        loginError.style.display = 'block';
-                    }
-                } else {
-                    console.error('Login failed:', data.error);
-                    loginError.textContent = data.error || 'Login failed';
-                    loginError.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                loginError.textContent = 'An error occurred. Please try again.';
-                loginError.style.display = 'block';
-            }
-        });
-
-        // Logout handling
-        document.getElementById('logout').addEventListener('click', async () => {
-            try {
-                console.log('Attempting logout...');
-                const response = await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    console.log('Logout successful');
-                    // Show login form and hide main container
-                    document.getElementById('loginContainer').style.display = 'flex';
-                    document.getElementById('mainContainer').style.display = 'none';
-                    
-                    // Clear any stored data
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    
-                    // Reset the login form
-                    document.getElementById('loginForm').reset();
-                    document.getElementById('loginError').style.display = 'none';
-                    
-                    // Clear username display
-                    const usernameDisplay = document.querySelector('.user-details #username');
-                    if (usernameDisplay) {
-                        usernameDisplay.textContent = '';
-                    }
-
-                    // Redirect to login page
-                    window.location.href = '/login.html';
-                } else {
-                    console.error('Logout failed:', await response.text());
-                    alert('Failed to logout. Please try again.');
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-                // Force logout on error
-                document.getElementById('loginContainer').style.display = 'flex';
-                document.getElementById('mainContainer').style.display = 'none';
-                const usernameDisplay = document.querySelector('.user-details #username');
-                if (usernameDisplay) {
-                    usernameDisplay.textContent = '';
-                }
-                window.location.href = '/login.html';
-            }
-        });
-
-        // Check session on page load
-        async function checkSession() {
-            try {
-                console.log('Checking session...');
-                const response = await fetch('/api/auth/me', {
-                    credentials: 'include',
-                    headers: {
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Session valid, user:', data.username);
-                    
-                    // Hide login form and show main container
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('mainContainer').style.display = 'flex';
-                    
-                    // Update username display
-                    const usernameDisplay = document.querySelector('.user-details #username');
-                    if (usernameDisplay) {
-                        usernameDisplay.textContent = data.username;
-                    }
-                    
-                    // Show/hide approvals link based on role
-                    const approvalsLink = document.getElementById('approvalsLink');
-                    if (data.role === 'superadmin') {
-                        approvalsLink.style.display = 'block';
-                    } else {
-                        approvalsLink.style.display = 'none';
-                    }
-
-                    // Load initial data
-                    loadDashboardData();
-                } else {
-                    console.log('No valid session found');
-                    // Show login form and hide main container
-                    document.getElementById('loginContainer').style.display = 'flex';
-                    document.getElementById('mainContainer').style.display = 'none';
-                    
-                    // Clear any stored data
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    
-                    // Reset the login form
-                    document.getElementById('loginForm').reset();
-                    document.getElementById('loginError').style.display = 'none';
-                    
-                    // Clear username display
-                    const usernameDisplay = document.querySelector('.user-details #username');
-                    if (usernameDisplay) {
-                        usernameDisplay.textContent = '';
+                    } catch (error) {
+                        console.error('Error checking user role:', error);
                     }
                 }
-            } catch (error) {
-                console.error('Session check error:', error);
-                // Show login form and hide main container
-                document.getElementById('loginContainer').style.display = 'flex';
-                document.getElementById('mainContainer').style.display = 'none';
-                
-                // Clear any stored data
-                localStorage.clear();
-                sessionStorage.clear();
-                
-                // Reset the login form
-                document.getElementById('loginForm').reset();
-                document.getElementById('loginError').style.display = 'none';
-                
-                // Clear username display
-                const usernameDisplay = document.querySelector('.user-details #username');
-                if (usernameDisplay) {
-                    usernameDisplay.textContent = '';
-                }
-            }
-        }
 
-        // Check session when page loads
-        checkSession();
-    </script>
+                // Call the function when the page loads
+                document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
+            </script>
 </body>
 </html> 
