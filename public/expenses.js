@@ -67,8 +67,10 @@ function initializePage() {
     flatpickr("#expenseDate", {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
-        defaultDate: new Date(),
-        time_24hr: true
+        defaultDate: null,
+        time_24hr: true,
+        placeholder: 'Select date and time',
+        allowInput: true
     });
 
     // Initialize date range picker for filters
@@ -652,12 +654,9 @@ async function openModal(expenseId = null) {
     // Reset form and clear any previous validation states
     form.reset();
     
-    // Initialize date picker with current date by default
+    // Get the date picker instance
     const datePicker = form.expenseDate._flatpickr;
-    if (datePicker) {
-        datePicker.setDate(new Date(), true);
-    }
-
+    
     if (expenseId) {
         try {
             const response = await fetch(`/api/expenses/${expenseId}`, {
@@ -684,7 +683,7 @@ async function openModal(expenseId = null) {
             form.paymentMethod.value = expense.paymentMethod;
             form.expenseNotes.value = expense.description || '';
             
-            // Set the date in the date picker
+            // Set the date in the date picker for editing
             if (datePicker) {
                 datePicker.setDate(new Date(expense.date), true);
             }
@@ -694,9 +693,14 @@ async function openModal(expenseId = null) {
             return;
         }
     } else {
-        // New expense
+        // New expense - clear the date field
         modalTitle.textContent = 'Add New Expense';
         submitBtn.textContent = 'Save Expense';
+        
+        // Clear the date field for new expense
+        if (datePicker) {
+            datePicker.clear();
+        }
     }
 
     // Show modal
@@ -717,10 +721,10 @@ function closeModal() {
     const form = document.getElementById('expenseForm');
     form.reset();
     
-    // Reset date picker to current date
+    // Clear the date picker
     const datePicker = form.expenseDate._flatpickr;
     if (datePicker) {
-        datePicker.setDate(new Date(), true);
+        datePicker.clear();
     }
 }
 
