@@ -24,12 +24,31 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
-app.use(session({
+
+// Session configuration
+const sessionConfig = {
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
-}));
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    },
+    name: 'sessionId' // Custom session name
+};
+
+// Use MongoDB session store in production
+if (process.env.NODE_ENV === 'production') {
+    const MongoStore = require('connect-mongo');
+    sessionConfig.store = MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        ttl: 24 * 60 * 60 // 24 hours
+    });
+}
+
+app.use(session(sessionConfig));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
