@@ -1154,12 +1154,13 @@
                         dashboardLink.parentElement.style.display = 'none';
                     }
 
-                    // Hide new ticket buttons
+                    // Hide new ticket buttons (both desktop and mobile)
                     if (newTicketBtn) {
                         newTicketBtn.style.display = 'none';
                     }
                     if (mobileNewTicketBtn) {
-                        mobileNewTicketBtn.style.display = 'none';
+                        mobileNewTicketBtn.style.display = 'none !important';
+                        mobileNewTicketBtn.remove(); // Completely remove the mobile FAB for junior staff
                     }
 
                     // Hide delete buttons for tickets
@@ -1188,6 +1189,16 @@
                     if (exportSection) {
                         exportSection.style.display = 'none';
                     }
+
+                    // Add CSS to ensure mobile FAB stays hidden
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .mobile-fab {
+                            display: none !important;
+                            visibility: hidden !important;
+                        }
+                    `;
+                    document.head.appendChild(style);
 
                 } else if (data.role === 'staff') {
                     // Staff restrictions
