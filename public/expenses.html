@@ -134,6 +134,150 @@
                 display: none !important;
             }
         }
+
+        .expense-category.salaries {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .expense-category.equipment {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .expense-category.transport {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .expense-category.internet-payment {
+            background-color: #9b59b6;  /* Purple color for Internet Payment */
+            color: white;
+        }
+
+        .expense-category.other {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        /* Chart legend colors */
+        .legend-color.salaries {
+            background-color: #3498db;
+        }
+
+        .legend-color.equipment {
+            background-color: #2ecc71;
+        }
+
+        .legend-color.transport {
+            background-color: #e74c3c;
+        }
+
+        .legend-color.internet-payment {
+            background-color: #9b59b6;
+        }
+
+        .legend-color.other {
+            background-color: #95a5a6;
+        }
+
+        /* Expense card styles */
+        .expense-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .expense-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .expense-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .expense-category {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .expense-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .expense-details div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expense-details .amount {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .expense-notes {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.9em;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .expense-notes i {
+            margin-top: 3px;
+        }
+
+        .expense-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-icon.delete {
+            color: #e74c3c;
+        }
+
+        .btn-icon.delete:hover {
+            background-color: #fee2e2;
+        }
     </style>
 </head>
 <body>
@@ -198,6 +342,7 @@
                         <option value="Salaries">Salaries</option>
                         <option value="Equipment">Equipment</option>
                         <option value="Transport">Transport</option>
+                        <option value="Internet Payment">Internet Payment</option>
                         <option value="Other">Other</option>
                     </select>
                     <select id="paymentMethodFilter">
@@ -274,6 +419,33 @@
                     <div class="chart-container">
                         <canvas id="categoryPieChart"></canvas>
                     </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color salaries"></div>
+                            <span>Salaries</span>
+                            <span class="legend-count" id="salariesCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color equipment"></div>
+                            <span>Equipment</span>
+                            <span class="legend-count" id="equipmentCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color transport"></div>
+                            <span>Transport</span>
+                            <span class="legend-count" id="transportCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color internet-payment"></div>
+                            <span>Internet Payment</span>
+                            <span class="legend-count" id="internetPaymentCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color other"></div>
+                            <span>Other</span>
+                            <span class="legend-count" id="otherCount">0</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
@@ -335,6 +507,7 @@
                         <option value="Salaries">Salaries</option>
                         <option value="Equipment">Equipment</option>
                         <option value="Transport">Transport</option>
+                        <option value="Internet Payment">Internet Payment</option>
                         <option value="Other">Other</option>
                     </select>
                 </div>

@@ -1139,15 +1139,62 @@
                 // Update username with role indicator
                 const usernameElement = document.getElementById('username');
                 const approvalsLink = document.getElementById('approvalsLink');
+                const expensesLink = document.querySelector('a[href="expenses.html"]');
+                const dashboardLink = document.querySelector('a[href="index.html"]');
+                const newTicketBtn = document.getElementById('newTicketBtn');
+                const mobileNewTicketBtn = document.getElementById('mobileNewTicketBtn');
                 
-                if (data.role === 'staff') {
-                    // Staff restrictions
-                    const expensesLink = document.querySelector('a[href="expenses.html"]');
+                if (data.role === 'juniorstaff') {
+                    // Junior Staff restrictions
                     if (expensesLink) {
                         expensesLink.parentElement.style.display = 'none';
                     }
 
-                    const dashboardLink = document.querySelector('a[href="index.html"]');
+                    if (dashboardLink) {
+                        dashboardLink.parentElement.style.display = 'none';
+                    }
+
+                    // Hide new ticket buttons
+                    if (newTicketBtn) {
+                        newTicketBtn.style.display = 'none';
+                    }
+                    if (mobileNewTicketBtn) {
+                        mobileNewTicketBtn.style.display = 'none';
+                    }
+
+                    // Hide delete buttons for tickets
+                    document.querySelectorAll('.ticket-action-btn.delete').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+
+                    if (usernameElement && !usernameElement.textContent.includes('(Junior Staff)')) {
+                        usernameElement.textContent = `${data.username} (Junior Staff)`;
+                    }
+
+                    // Hide charts section for junior staff
+                    const chartsSection = document.querySelector('.charts-section');
+                    if (chartsSection) {
+                        chartsSection.style.display = 'none';
+                    }
+
+                    // Hide dashboard stats for junior staff
+                    const dashboardStats = document.querySelector('.dashboard-stats');
+                    if (dashboardStats) {
+                        dashboardStats.style.display = 'none';
+                    }
+
+                    // Hide export section for junior staff
+                    const exportSection = document.querySelector('.export-section');
+                    if (exportSection) {
+                        exportSection.style.display = 'none';
+                    }
+
+                } else if (data.role === 'staff') {
+                    // Staff restrictions
+                    if (expensesLink) {
+                        expensesLink.parentElement.style.display = 'none';
+                    }
+
                     if (dashboardLink) {
                         dashboardLink.parentElement.style.display = 'none';
                     }
@@ -1180,6 +1227,9 @@
                         logoText.textContent = 'Admin Portal';
                     }
                 }
+
+                // Update the ticket display to reflect role-based permissions
+                displayTickets();
             } catch (error) {
                 console.error('Error checking user role:', error);
             }
@@ -1188,13 +1238,13 @@
         // Call the function when the page loads
         document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
 
-        // Override the deleteTicket function to prevent staff from deleting
+        // Override the deleteTicket function to prevent staff and junior staff from deleting
         const originalDeleteTicket = window.deleteTicket;
         window.deleteTicket = async function(ticketId) {
             const response = await fetch('/api/auth/check');
             const data = await response.json();
             
-            if (data.role.toLowerCase() === 'staff') {
+            if (data.role.toLowerCase() === 'staff' || data.role.toLowerCase() === 'juniorstaff') {
                 showNotification('You do not have permission to delete tickets.', 'error');
                 return;
             }

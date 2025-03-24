@@ -16,7 +16,9 @@ const app = express();
 
 // Middleware
 app.use(cors({ 
-    origin: 'https://admin-newiconic.onrender.com',
+    origin: process.env.NODE_ENV === 'production' 
+        ? 'https://admin-newiconic.onrender.com'
+        : 'http://localhost:3000',
     credentials: true 
 }));
 
@@ -30,16 +32,18 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     },
-    proxy: true // Required for cookies to work in production
+    proxy: process.env.NODE_ENV === 'production' // Only needed in production
 }));
 
 // Add trust proxy for secure cookies in production
-app.set('trust proxy', 1);
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
 
 // Debug route to check session
 app.get('/check-session', (req, res) => {
@@ -73,7 +77,32 @@ const requireAuth = (req, res, next) => {
 const enforceRoleAccess = (req, res, next) => {
     const userRole = req.session.userRole?.toLowerCase();
 
-    if (userRole === 'staff') {
+    if (userRole === 'juniorstaff') {
+        // JuniorStaff restrictions - can only view and edit tickets
+        const allowedPaths = [
+            '/tickets.html',
+            '/api/tickets',
+            '/api/auth/logout',
+            '/api/auth/check',
+            '/login.html'
+        ];
+
+        const isAllowedPath = allowedPaths.some(path => req.path.startsWith(path));
+        
+        // Only allow GET and PUT methods for tickets
+        if (req.path.startsWith('/api/tickets')) {
+            if (req.method === 'POST' || req.method === 'DELETE') {
+                return res.status(403).json({ error: 'Junior Staff members cannot create or delete tickets' });
+            }
+        }
+
+        if (!isAllowedPath) {
+            if (req.xhr || req.path.startsWith('/api/')) {
+                return res.status(403).json({ error: 'Access denied' });
+            }
+            return res.redirect('/tickets.html');
+        }
+    } else if (userRole === 'staff') {
         // Staff restrictions
         const allowedPaths = [
             '/tickets.html',
@@ -155,6 +184,7 @@ app.get('/', (req, res) => {
     switch (userRole) {
         case 'user':
             return res.redirect('/blank.html');
+        case 'juniorstaff':
         case 'staff':
             return res.redirect('/tickets.html');
         case 'admin':

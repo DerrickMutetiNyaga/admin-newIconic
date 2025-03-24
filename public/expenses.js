@@ -3,6 +3,8 @@ let categoryPieChart = null;
 let monthlyBarChart = null;
 let trendLineChart = null;
 let currentExpenseId = null;
+let currentPage = 1;
+const itemsPerPage = 9;
 
 // DOM Elements
 const elements = {
@@ -137,6 +139,15 @@ function initializeCharts() {
         }
     };
 
+    // Category colors
+    const categoryColors = {
+        'Salaries': '#3498db',
+        'Equipment': '#2ecc71',
+        'Transport': '#e74c3c',
+        'Internet Payment': '#9b59b6',
+        'Other': '#95a5a6'
+    };
+
     // Category Pie Chart
     const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
     categoryPieChart = new Chart(pieCtx, {
@@ -145,15 +156,21 @@ function initializeCharts() {
             labels: [],
             datasets: [{
                 data: [],
-                backgroundColor: [
-                    '#FF6384',
-                    '#36A2EB',
-                    '#FFCE56',
-                    '#4BC0C0'
-                ]
+                backgroundColor: Object.values(categoryColors)
             }]
         },
-        options: chartOptions
+        options: {
+            ...chartOptions,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            }
+        }
     });
 
     // Monthly Bar Chart
@@ -267,10 +284,14 @@ async function handleExpenseSubmit(e) {
         const card = document.createElement('div');
         card.className = 'expense-card';
         card.dataset.expenseId = savedExpense._id;
+        
+        // Convert category to class-friendly format
+        const categoryClass = savedExpense.category.toLowerCase().replace(/\s+/g, '-');
+        
         card.innerHTML = `
             <div class="expense-header">
                 <h3>${savedExpense.name}</h3>
-                <span class="category-badge ${savedExpense.category.toLowerCase()}">${savedExpense.category}</span>
+                <span class="expense-category ${categoryClass}">${savedExpense.category}</span>
             </div>
             <div class="expense-details">
                 <div class="amount">
@@ -361,11 +382,11 @@ async function loadExpenses() {
         }
 
         let expenses = await response.json();
-        console.log('Fetched expenses:', expenses); // Debug log
+        console.log('Fetched expenses:', expenses);
 
         // Apply filters
         expenses = filterExpenses(expenses);
-        console.log('Filtered expenses:', expenses); // Debug log
+        console.log('Filtered expenses:', expenses);
 
         // Sort expenses by date (newest first)
         expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -382,15 +403,27 @@ async function loadExpenses() {
 
         noExpenses.style.display = 'none';
 
-        // Display expenses as cards
-        expenses.forEach(expense => {
+        // Calculate pagination
+        const totalPages = Math.ceil(expenses.length / itemsPerPage);
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, expenses.length);
+        const paginatedExpenses = expenses.slice(startIndex, endIndex);
+
+        // Display paginated expenses
+        paginatedExpenses.forEach(expense => {
             const card = document.createElement('div');
             card.className = 'expense-card';
             card.dataset.expenseId = expense._id;
+            
+            const categoryClass = expense.category.toLowerCase().replace(/\s+/g, '-');
+            
             card.innerHTML = `
                 <div class="expense-header">
                     <h3>${expense.name}</h3>
-                    <span class="category-badge ${expense.category.toLowerCase()}">${expense.category}</span>
+                    <span class="expense-category ${categoryClass}">${expense.category}</span>
                 </div>
                 <div class="expense-details">
                     <div class="amount">
@@ -423,7 +456,10 @@ async function loadExpenses() {
             expensesList.appendChild(card);
         });
 
-        // Update charts and totals
+        // Update pagination controls
+        updatePaginationControls(expenses.length, totalPages);
+
+        // Update charts and totals with all expenses (not just paginated)
         updateCharts(expenses);
         updateTotals(expenses);
     } catch (error) {
@@ -525,14 +561,33 @@ function updateCharts(filteredExpenses) {
     );
 
     // Update Category Pie Chart with only current month's data
-    const categoryData = {};
+    const categoryData = {
+        'Salaries': 0,
+        'Equipment': 0,
+        'Transport': 0,
+        'Internet Payment': 0,
+        'Other': 0
+    };
+
+    // Count expenses by category
     currentMonthExpenses.forEach(expense => {
         categoryData[expense.category] = (categoryData[expense.category] || 0) + expense.amount;
     });
 
+    // Update the legend counts
+    document.getElementById('salariesCount').textContent = currentMonthExpenses.filter(e => e.category === 'Salaries').length;
+    document.getElementById('equipmentCount').textContent = currentMonthExpenses.filter(e => e.category === 'Equipment').length;
+    document.getElementById('transportCount').textContent = currentMonthExpenses.filter(e => e.category === 'Transport').length;
+    document.getElementById('internetPaymentCount').textContent = currentMonthExpenses.filter(e => e.category === 'Internet Payment').length;
+    document.getElementById('otherCount').textContent = currentMonthExpenses.filter(e => e.category === 'Other').length;
+
     categoryPieChart.data.labels = Object.keys(categoryData);
     categoryPieChart.data.datasets[0].data = Object.values(categoryData);
-    categoryPieChart.options.plugins.title.text = `Expense Categories - ${moment(currentMonth).format('MMMM YYYY')}`;
+    categoryPieChart.options.plugins.title = {
+        display: true,
+        text: `Expense Categories - ${moment(currentMonth).format('MMMM YYYY')}`,
+        font: { size: 16 }
+    };
     categoryPieChart.update();
 
     // Update Monthly Bar Chart
@@ -1077,4 +1132,89 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-}); 
+});
+
+// Add pagination controls update function
+function updatePaginationControls(totalItems, totalPages) {
+    const paginationContainer = document.querySelector('.pagination');
+    if (!paginationContainer) {
+        // Create pagination container if it doesn't exist
+        const container = document.createElement('div');
+        container.className = 'pagination';
+        container.innerHTML = `
+            <button id="prevPage" class="btn-secondary">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span id="pageInfo">Page ${currentPage} of ${totalPages}</span>
+            <button id="nextPage" class="btn-secondary">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+        document.querySelector('.expenses-section').appendChild(container);
+
+        // Add event listeners for pagination buttons
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadExpenses();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadExpenses();
+            }
+        });
+    } else {
+        // Update existing pagination controls
+        const pageInfo = document.getElementById('pageInfo');
+        const prevButton = document.getElementById('prevPage');
+        const nextButton = document.getElementById('nextPage');
+
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = currentPage === totalPages;
+    }
+}
+
+// Add CSS styles for pagination
+const style = document.createElement('style');
+style.textContent = `
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+        padding: 20px 0;
+    }
+
+    .pagination button {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        background-color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .pagination button:hover:not(:disabled) {
+        background-color: #f5f5f5;
+        border-color: #ccc;
+    }
+
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination #pageInfo {
+        color: #666;
+        font-size: 0.9em;
+    }
+`;
+document.head.appendChild(style); 

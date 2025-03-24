@@ -117,30 +117,57 @@ async function checkUserRoleAndApplyRestrictions() {
         });
         const data = await response.json();
         
-        if (data.role === 'staff') {
-            // Hide expenses link
-            const expensesLink = document.querySelector('a[href="expenses.html"]');
-            if (expensesLink) {
-                expensesLink.parentElement.style.display = 'none';
-            }
+        // Hide expenses link and dashboard link by default for restricted roles
+        const expensesLink = document.querySelector('a[href="expenses.html"]');
+        const dashboardLink = document.querySelector('a[href="index.html"]');
+        const newTicketBtn = document.getElementById('newTicketBtn');
+        const mobileNewTicketBtn = document.getElementById('mobileNewTicketBtn');
+        const usernameElement = document.getElementById('username');
 
-            // Hide dashboard link
-            const dashboardLink = document.querySelector('a[href="index.html"]');
-            if (dashboardLink) {
-                dashboardLink.parentElement.style.display = 'none';
+        if (data.role === 'juniorStaff') {
+            // Hide unnecessary links
+            if (expensesLink) expensesLink.parentElement.style.display = 'none';
+            if (dashboardLink) dashboardLink.parentElement.style.display = 'none';
+            
+            // Hide new ticket buttons
+            if (newTicketBtn) newTicketBtn.style.display = 'none';
+            if (mobileNewTicketBtn) mobileNewTicketBtn.style.display = 'none';
+
+            // Hide delete buttons for tickets
+            document.querySelectorAll('.ticket-action-btn.delete').forEach(btn => {
+                btn.style.display = 'none';
+            });
+
+            // Add junior staff indicator
+            if (usernameElement && !usernameElement.textContent.includes('(Junior Staff)')) {
+                usernameElement.textContent = `${data.username} (Junior Staff)`;
             }
+        } else if (data.role === 'staff') {
+            // Existing staff restrictions
+            if (expensesLink) expensesLink.parentElement.style.display = 'none';
+            if (dashboardLink) dashboardLink.parentElement.style.display = 'none';
 
             // Add staff indicator
-            const usernameElement = document.getElementById('username');
             if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
-                usernameElement.textContent = `${usernameElement.textContent} (Staff)`;
+                usernameElement.textContent = `${data.username} (Staff)`;
             }
 
             // Hide delete buttons for tickets
             document.querySelectorAll('.ticket-action-btn.delete').forEach(btn => {
                 btn.style.display = 'none';
             });
+        } else if (data.role === 'admin') {
+            if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                usernameElement.textContent = `${data.username} (Admin)`;
+            }
+        } else if (data.role === 'superadmin') {
+            if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                usernameElement.textContent = `${data.username} (Superadmin)`;
+            }
         }
+
+        // Update the ticket display to reflect role-based permissions
+        displayTickets();
     } catch (error) {
         console.error('Error checking user role:', error);
     }
@@ -313,7 +340,13 @@ async function loadTickets() {
         if (!response.ok) throw new Error('Failed to fetch tickets');
         
         allTickets = await response.json();
-        filteredTickets = [...allTickets];
+        
+        // Sort tickets: Open tickets first, then by creation time
+        filteredTickets = [...allTickets].sort((a, b) => {
+            if (a.status === 'Open' && b.status !== 'Open') return -1;
+            if (a.status !== 'Open' && b.status === 'Open') return 1;
+            return new Date(b.reportedDateTime) - new Date(a.reportedDateTime);
+        });
         
         // Update stats
         updateStats();
@@ -365,9 +398,20 @@ function updateCharts() {
 
 // Display tickets in the grid
 function displayTickets() {
+    // Sort tickets: Open tickets first, then by creation time (newest first)
+    const sortedTickets = [...filteredTickets].sort((a, b) => {
+        // First, prioritize Open tickets
+        if (a.status === 'Open' && b.status !== 'Open') return -1;
+        if (a.status !== 'Open' && b.status === 'Open') return 1;
+        
+        // Then sort by reportedDateTime (newest first)
+        return new Date(b.reportedDateTime) - new Date(a.reportedDateTime);
+    });
+
+    // Apply pagination to sorted tickets
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const pageTickets = filteredTickets.slice(startIndex, endIndex);
+    const pageTickets = sortedTickets.slice(startIndex, endIndex);
 
     if (pageTickets.length === 0) {
         elements.ticketsList.innerHTML = '';
@@ -376,59 +420,75 @@ function displayTickets() {
     }
 
     elements.noTickets.style.display = 'none';
-    elements.ticketsList.innerHTML = pageTickets.map(ticket => `
-        <div class="ticket-card">
-            <div class="ticket-header">
-                <span class="ticket-id">#${ticket._id.slice(-6)}</span>
-                <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
-            </div>
-            <div class="ticket-body">
-                <div class="ticket-client">
-                    <div class="client-name">${ticket.clientName}</div>
-                    <div class="client-details">
-                        <div class="client-detail-item">
-                            <i class="fas fa-phone"></i>
-                            <a href="tel:${ticket.clientNumber}" class="phone-link">
-                                <span>${ticket.clientNumber}</span>
-                            </a>
+
+    // Get user role for conditional rendering
+    fetch('/api/auth/check', { credentials: 'include' })
+        .then(response => response.json())
+        .then(data => {
+            const userRole = data.role;
+            const isJuniorStaff = userRole === 'juniorstaff';
+            const isStaff = userRole === 'staff';
+
+            elements.ticketsList.innerHTML = pageTickets.map(ticket => `
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <span class="ticket-id">#${ticket._id.slice(-6)}</span>
+                        <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                    </div>
+                    <div class="ticket-body">
+                        <div class="ticket-client">
+                            <div class="client-name">${ticket.clientName}</div>
+                            <div class="client-details">
+                                <div class="client-detail-item">
+                                    <i class="fas fa-phone"></i>
+                                    <a href="tel:${ticket.clientNumber}" class="phone-link">
+                                        <span>${ticket.clientNumber}</span>
+                                    </a>
+                                </div>
+                                <div class="client-detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    ${ticket.stationLocation}
+                                </div>
+                                <div class="client-detail-item">
+                                    <i class="fas fa-home"></i>
+                                    ${ticket.houseNumber}
+                                </div>
+                            </div>
                         </div>
-                        <div class="client-detail-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${ticket.stationLocation}</span>
+                        <span class="ticket-category ${ticket.category.toLowerCase().replace(/\s+/g, '-')}">${ticket.category}</span>
+                        <div class="ticket-description">
+                            <strong>Problem:</strong>
+                            ${ticket.problemDescription}
                         </div>
-                        <div class="client-detail-item">
-                            <i class="fas fa-home"></i>
-                            <span>${ticket.houseNumber}</span>
+                        ${ticket.problemCorrected ? `
+                            <div class="ticket-solution">
+                                <strong>Solution:</strong>
+                                ${ticket.problemCorrected}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="ticket-footer">
+                        <span class="ticket-date">
+                            <i class="far fa-clock"></i>
+                            ${formatDate(ticket.reportedDateTime)}
+                        </span>
+                        <div class="ticket-actions">
+                            <button class="ticket-action-btn edit" onclick="openEditModal('${ticket._id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            ${(!isJuniorStaff && !isStaff) ? `
+                                <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
-                <div class="ticket-category">
-                    <i class="fas fa-tag"></i> ${ticket.category}
-                </div>
-                <div class="ticket-description">
-                    <strong>Problem:</strong> ${ticket.problemDescription}
-                </div>
-                ${ticket.problemCorrected ? `
-                <div class="ticket-solution">
-                    <strong>Solution:</strong> ${ticket.problemCorrected}
-                </div>
-                ` : ''}
-            </div>
-            <div class="ticket-footer">
-                <div class="ticket-date">
-                    <i class="far fa-clock"></i> ${formatDate(ticket.reportedDateTime)}
-                </div>
-                <div class="ticket-actions">
-                    <button class="ticket-action-btn edit" onclick="editTicket('${ticket._id}')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Error fetching user role:', error);
+        });
 
     updatePagination();
 }
@@ -547,7 +607,12 @@ async function handleTicketEdit(e) {
     
     const ticketId = document.getElementById('editTicketId').value;
     const status = document.getElementById('editTicketStatus').value;
-    const problemCorrected = document.getElementById('problemCorrected').value;
+    const problemCorrected = document.getElementById('problemCorrected')?.value || '';
+
+    const updateData = {
+        status,
+        problemCorrected: status === 'Resolved' ? problemCorrected : undefined
+    };
 
     try {
         const response = await fetch(`/api/tickets/${ticketId}`, {
@@ -555,10 +620,7 @@ async function handleTicketEdit(e) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ 
-                status,
-                problemCorrected: status === 'Resolved' ? problemCorrected : undefined
-            })
+            body: JSON.stringify(updateData)
         });
 
         if (!response.ok) {
@@ -567,17 +629,20 @@ async function handleTicketEdit(e) {
         }
 
         const updatedTicket = await response.json();
+        
+        // Update the ticket in our arrays
         const index = allTickets.findIndex(t => t._id === ticketId);
         if (index !== -1) {
             allTickets[index] = updatedTicket;
-            filteredTickets = [...allTickets];
+            filteredTickets = filteredTickets.map(t => 
+                t._id === ticketId ? updatedTicket : t
+            );
         }
 
         closeModal('editTicketModal');
-        elements.editTicketForm.reset();
+        document.getElementById('editTicketForm').reset();
         
         displayTickets();
-        updatePagination();
         updateStats();
         updateCharts();
         
@@ -589,20 +654,27 @@ async function handleTicketEdit(e) {
 }
 
 // Edit ticket
-async function editTicket(ticketId) {
+async function openEditModal(ticketId) {
     try {
         const response = await fetch(`/api/tickets/${ticketId}`);
         if (!response.ok) throw new Error('Failed to fetch ticket');
 
         const ticket = await response.json();
+        
+        // Set form values
         document.getElementById('editTicketId').value = ticket._id;
         document.getElementById('editTicketStatus').value = ticket.status;
-        document.getElementById('problemCorrected').value = ticket.problemCorrected || '';
         
         // Show/hide problem corrected field based on status
         const problemCorrectedGroup = document.getElementById('problemCorrectedGroup');
-        problemCorrectedGroup.style.display = ticket.status === 'Resolved' ? 'block' : 'none';
+        if (problemCorrectedGroup) {
+            problemCorrectedGroup.style.display = ticket.status === 'Resolved' ? 'block' : 'none';
+            if (ticket.status === 'Resolved') {
+                document.getElementById('problemCorrected').value = ticket.problemCorrected || '';
+            }
+        }
         
+        // Show the modal
         showModal('editTicketModal');
     } catch (error) {
         console.error('Error fetching ticket:', error);
