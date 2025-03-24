@@ -502,15 +502,6 @@
             }
 
             try {
-                // In development mode, simulate API response
-                if (isDevMode) {
-                    console.log('Development mode: Simulating API response');
-                    closeModal('userModal');
-                    loadUsers();
-                    showNotification('User saved successfully (Dev Mode)', 'success');
-                    return;
-                }
-
                 const url = userId ? `/api/users/${userId}` : '/api/users';
                 const method = userId ? 'PUT' : 'POST';
                 
@@ -530,13 +521,6 @@
                 showNotification('User saved successfully', 'success');
             } catch (error) {
                 console.error('Error saving user:', error);
-                if (isDevMode) {
-                    console.log('Development mode: Ignoring error');
-                    closeModal('userModal');
-                    loadUsers();
-                    showNotification('User saved successfully (Dev Mode)', 'success');
-                    return;
-                }
                 showNotification('Error saving user', 'error');
             }
         }
@@ -552,19 +536,27 @@
                 modalTitle.textContent = 'Edit User Role & Status';
                 document.getElementById('userId').value = user._id;
                 
-                // Hide username, email, and password fields
-                document.getElementById('usernameGroup').style.display = 'none';
-                document.getElementById('emailGroup').style.display = 'none';
-                document.getElementById('passwordGroup').style.display = 'none';
+                // Show all fields but make username, email, and password read-only
+                document.getElementById('usernameGroup').style.display = 'block';
+                document.getElementById('emailGroup').style.display = 'block';
+                document.getElementById('passwordGroup').style.display = 'block';
                 
-                // Remove required attributes for hidden fields
+                // Fill in all fields with user data
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                document.getElementById('password').value = '********'; // Placeholder for password
+                document.getElementById('role').value = user.role;
+                document.getElementById('status').value = user.status;
+                
+                // Make username, email, and password read-only
+                document.getElementById('username').readOnly = true;
+                document.getElementById('email').readOnly = true;
+                document.getElementById('password').readOnly = true;
+                
+                // Remove required attributes for read-only fields
                 document.getElementById('username').required = false;
                 document.getElementById('email').required = false;
                 document.getElementById('password').required = false;
-                
-                // Only show and set role and status
-                document.getElementById('role').value = user.role;
-                document.getElementById('status').value = user.status;
 
                 showModal('userModal');
             } catch (error) {
