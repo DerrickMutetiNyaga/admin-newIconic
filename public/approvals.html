@@ -437,7 +437,12 @@
                 modalTitle.textContent = 'Add New User';
                 userForm.reset();
                 document.getElementById('userId').value = '';
+                
+                // Show all fields when adding new user
+                document.querySelector('.form-group:nth-child(1)').style.display = 'block';
+                document.querySelector('.form-group:nth-child(2)').style.display = 'block';
                 document.querySelector('.password-group').style.display = 'block';
+                
                 showModal('userModal');
             });
 
@@ -472,16 +477,23 @@
         async function handleUserSubmit(e) {
             e.preventDefault();
             const userId = document.getElementById('userId').value;
-            const userData = {
-                username: document.getElementById('username').value,
-                email: document.getElementById('email').value,
-                role: document.getElementById('role').value,
-                status: document.getElementById('status').value
-            };
+            let userData;
 
-            if (!userId) {
-                // Creating new user
-                userData.password = document.getElementById('password').value;
+            if (userId) {
+                // Editing existing user - only send role and status
+                userData = {
+                    role: document.getElementById('role').value,
+                    status: document.getElementById('status').value
+                };
+            } else {
+                // Creating new user - send all fields
+                userData = {
+                    username: document.getElementById('username').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    role: document.getElementById('role').value,
+                    status: document.getElementById('status').value
+                };
             }
 
             try {
@@ -518,11 +530,15 @@
 
                 modalTitle.textContent = 'Edit User';
                 document.getElementById('userId').value = user._id;
-                document.getElementById('username').value = user.username;
-                document.getElementById('email').value = user.email;
+                
+                // Hide username and email fields when editing
+                document.querySelector('.form-group:nth-child(1)').style.display = 'none';
+                document.querySelector('.form-group:nth-child(2)').style.display = 'none';
+                document.querySelector('.password-group').style.display = 'none';
+                
+                // Only show and set role and status
                 document.getElementById('role').value = user.role;
                 document.getElementById('status').value = user.status;
-                document.querySelector('.password-group').style.display = 'none';
 
                 showModal('userModal');
             } catch (error) {

@@ -12,14 +12,14 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #2c3e50, #3498db);
+            background: linear-gradient(145deg, #1a472a, #2d8659);
         }
 
         .login-card {
             background: white;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 400px;
         }
@@ -30,12 +30,15 @@
         }
 
         .login-header h2 {
-            color: #2c3e50;
+            color: #1a472a;
             margin-bottom: 10px;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .login-header i {
             margin-right: 10px;
+            color: #2d8659;
         }
 
         .login-form {
@@ -51,7 +54,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #2c3e50;
+            color: #1a472a;
             font-weight: 500;
         }
 
@@ -65,7 +68,7 @@
         }
 
         .form-group input:focus {
-            border-color: #3498db;
+            border-color: #2d8659;
             outline: none;
         }
 
@@ -74,18 +77,21 @@
         }
 
         .btn-primary {
-            background: #3498db;
+            background: #2d8659;
             color: white;
             padding: 12px;
             border: none;
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .btn-primary:hover {
-            background: #2980b9;
+            background: #1a472a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .form-footer {
@@ -95,11 +101,13 @@
         }
 
         .form-footer a {
-            color: #3498db;
+            color: #2d8659;
             text-decoration: none;
+            font-weight: 500;
         }
 
         .form-footer a:hover {
+            color: #1a472a;
             text-decoration: underline;
         }
 
@@ -108,6 +116,9 @@
             text-align: center;
             margin-top: 10px;
             display: none;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
         }
 
         .success-message {
@@ -115,6 +126,9 @@
             text-align: center;
             margin-top: 10px;
             display: none;
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -122,7 +136,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h2><i class="fas fa-ticket-alt"></i> Ticketing & Expense System</h2>
+                <h2><i class="fas fa-ticket-alt"></i> ICONIC FIBRE</h2>
                 <p>Please login to continue</p>
             </div>
             <form id="loginForm" class="login-form">
