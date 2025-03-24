@@ -439,9 +439,13 @@
                 document.getElementById('userId').value = '';
                 
                 // Show all fields when adding new user
-                document.querySelector('.form-group:nth-child(1)').style.display = 'block';
-                document.querySelector('.form-group:nth-child(2)').style.display = 'block';
-                document.querySelector('.password-group').style.display = 'block';
+                const usernameGroup = document.querySelector('#userForm .form-group:nth-child(1)');
+                const emailGroup = document.querySelector('#userForm .form-group:nth-child(2)');
+                const passwordGroup = document.querySelector('#userForm .password-group');
+                
+                if (usernameGroup) usernameGroup.style.display = 'block';
+                if (emailGroup) emailGroup.style.display = 'block';
+                if (passwordGroup) passwordGroup.style.display = 'block';
                 
                 showModal('userModal');
             });
@@ -531,10 +535,14 @@
                 modalTitle.textContent = 'Edit User';
                 document.getElementById('userId').value = user._id;
                 
-                // Hide username and email fields when editing
-                document.querySelector('.form-group:nth-child(1)').style.display = 'none';
-                document.querySelector('.form-group:nth-child(2)').style.display = 'none';
-                document.querySelector('.password-group').style.display = 'none';
+                // Hide username, email, and password fields when editing
+                const usernameGroup = document.querySelector('#userForm .form-group:nth-child(1)');
+                const emailGroup = document.querySelector('#userForm .form-group:nth-child(2)');
+                const passwordGroup = document.querySelector('#userForm .password-group');
+                
+                if (usernameGroup) usernameGroup.style.display = 'none';
+                if (emailGroup) emailGroup.style.display = 'none';
+                if (passwordGroup) passwordGroup.style.display = 'none';
                 
                 // Only show and set role and status
                 document.getElementById('role').value = user.role;
