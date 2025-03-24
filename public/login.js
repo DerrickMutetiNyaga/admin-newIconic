@@ -4,35 +4,38 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     
+    console.log('Attempting login for username:', username);
+    
     try {
         const response = await fetch('/api/auth/login', {
             method: 'POST',
-            credentials: 'include', // Important for session cookies
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ username, password })
         });
-
+        
         const data = await response.json();
+        console.log('Login response:', data);
         
         if (response.ok) {
-            // Store user info in sessionStorage
-            sessionStorage.setItem('user', JSON.stringify(data.user));
-            sessionStorage.setItem('role', data.role);
-            
-            // Redirect based on role
-            if (data.role === 'superadmin') {
-                window.location.href = '/index.html';
+            if (data.redirectUrl) {
+                console.log('Redirecting to:', data.redirectUrl);
+                // Add a small delay to ensure the session is properly set
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl;
+                }, 100);
             } else {
-                window.location.href = '/expenses.html';
+                console.error('No redirect URL in response:', data);
+                showNotification('Error: No redirect URL provided', 'error');
             }
         } else {
+            console.error('Login failed:', data.error);
             showNotification(data.error || 'Login failed', 'error');
         }
     } catch (error) {
         console.error('Login error:', error);
-        showNotification('Login failed. Please try again.', 'error');
+        showNotification('An error occurred during login', 'error');
     }
 });
 

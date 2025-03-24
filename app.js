@@ -15,37 +15,16 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors({
-    origin: 'https://admin-newiconic.onrender.com',
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
-
-// Session configuration
-const sessionConfig = {
+app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        secure: true,
-        httpOnly: true,
-        sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        path: '/'
-    },
-    name: 'sessionId'
-};
-
-// Use MongoDB session store
-const MongoStore = require('connect-mongo');
-sessionConfig.store = MongoStore.create({
-    mongoUrl: process.env.MONGO_URI,
-    ttl: 24 * 60 * 60 // 24 hours
-});
-
-app.use(session(sessionConfig));
+    cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
