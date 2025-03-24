@@ -15,21 +15,41 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? process.env.FRONTEND_URL || 'https://your-render-domain.onrender.com'
-        : 'http://localhost:3000',
-    credentials: true
+app.use(cors({ 
+    origin: 'https://admin-newiconic.onrender.com',
+    credentials: true 
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+// Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    cookie: {
+        secure: true,
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    },
+    proxy: true // Required for cookies to work in production
 }));
+
+// Add trust proxy for secure cookies in production
+app.set('trust proxy', 1);
+
+// Debug route to check session
+app.get('/check-session', (req, res) => {
+    console.log('Session data:', req.session);
+    res.json({ 
+        session: req.session,
+        cookies: req.cookies,
+        headers: req.headers
+    });
+});
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -239,31 +259,6 @@ app.post('/api/auth/login', async (req, res) => {
             roleType: typeof user.role
         });
 
-        // Determine redirect URL based on role
-        let redirectUrl;
-        const userRole = user.role.toLowerCase();
-        console.log('Processing role:', userRole);
-
-        switch (userRole) {
-            case 'user':
-                redirectUrl = '/blank.html';
-                break;
-            case 'staff':
-                redirectUrl = '/tickets.html';
-                break;
-            case 'admin':
-                redirectUrl = '/tickets.html';
-                break;
-            case 'superadmin':
-                redirectUrl = '/';
-                break;
-            default:
-                console.log('Unknown role, defaulting to blank.html');
-                redirectUrl = '/blank.html';
-        }
-
-        console.log('Final redirect URL:', redirectUrl);
-
         // Save session before sending response
         req.session.save((err) => {
             if (err) {
@@ -271,11 +266,15 @@ app.post('/api/auth/login', async (req, res) => {
                 return res.status(500).json({ error: 'Session error' });
             }
             
+            // Set response headers for CORS
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
+            res.setHeader('Access-Control-Allow-Origin', 'https://admin-newiconic.onrender.com');
+            
             res.json({ 
                 success: true, 
                 username: user.username,
                 role: user.role,
-                redirectUrl: redirectUrl
+                redirectUrl: '/tickets.html'
             });
         });
     } catch (error) {

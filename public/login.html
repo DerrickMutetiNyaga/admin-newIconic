@@ -170,16 +170,22 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify({ username, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    if (data.redirectUrl) {
+                    const sessionCheck = await fetch('/api/auth/check', {
+                        credentials: 'include'
+                    });
+                    const sessionData = await sessionCheck.json();
+                    
+                    if (sessionData.authenticated) {
                         window.location.href = data.redirectUrl;
                     } else {
-                        errorMessage.textContent = 'Server error: No redirect URL provided';
+                        errorMessage.textContent = 'Session not established. Please try again.';
                         errorMessage.style.display = 'block';
                     }
                 } else {
