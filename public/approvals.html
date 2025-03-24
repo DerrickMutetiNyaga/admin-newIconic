@@ -311,15 +311,15 @@
             </div>
             <form id="userForm">
                 <input type="hidden" id="userId">
-                <div class="form-group">
+                <div class="form-group" id="usernameGroup">
                     <label for="username">Username *</label>
                     <input type="text" id="username" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="emailGroup">
                     <label for="email">Email *</label>
                     <input type="email" id="email" required>
                 </div>
-                <div class="form-group password-group">
+                <div class="form-group password-group" id="passwordGroup">
                     <label for="password">Password *</label>
                     <input type="password" id="password" required>
                 </div>
@@ -439,13 +439,9 @@
                 document.getElementById('userId').value = '';
                 
                 // Show all fields when adding new user
-                const usernameGroup = document.querySelector('#userForm .form-group:nth-child(1)');
-                const emailGroup = document.querySelector('#userForm .form-group:nth-child(2)');
-                const passwordGroup = document.querySelector('#userForm .password-group');
-                
-                if (usernameGroup) usernameGroup.style.display = 'block';
-                if (emailGroup) emailGroup.style.display = 'block';
-                if (passwordGroup) passwordGroup.style.display = 'block';
+                document.getElementById('usernameGroup').style.display = 'block';
+                document.getElementById('emailGroup').style.display = 'block';
+                document.getElementById('passwordGroup').style.display = 'block';
                 
                 showModal('userModal');
             });
@@ -532,17 +528,13 @@
                 });
                 const user = await response.json();
 
-                modalTitle.textContent = 'Edit User';
+                modalTitle.textContent = 'Edit User Role & Status';
                 document.getElementById('userId').value = user._id;
                 
-                // Hide username, email, and password fields when editing
-                const usernameGroup = document.querySelector('#userForm .form-group:nth-child(1)');
-                const emailGroup = document.querySelector('#userForm .form-group:nth-child(2)');
-                const passwordGroup = document.querySelector('#userForm .password-group');
-                
-                if (usernameGroup) usernameGroup.style.display = 'none';
-                if (emailGroup) emailGroup.style.display = 'none';
-                if (passwordGroup) passwordGroup.style.display = 'none';
+                // Hide username, email, and password fields
+                document.getElementById('usernameGroup').style.display = 'none';
+                document.getElementById('emailGroup').style.display = 'none';
+                document.getElementById('passwordGroup').style.display = 'none';
                 
                 // Only show and set role and status
                 document.getElementById('role').value = user.role;
