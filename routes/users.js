@@ -3,6 +3,62 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
+// Login route
+router.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        console.log('Login attempt for username:', username);
+
+        // Find user
+        const user = await User.findOne({ username });
+        console.log('Found user:', user ? 'Yes' : 'No');
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Check password
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log('Password match:', isMatch);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Set session data
+        req.session.userId = user._id;
+        req.session.userRole = user.role;
+        req.session.username = user.username;
+
+        // Save session explicitly
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'Session error' });
+            }
+            
+            // Send user data without password
+            const userResponse = user.toObject();
+            delete userResponse.password;
+            res.json(userResponse);
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Logout route
+router.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.status(500).json({ error: 'Server error' });
+        }
+        res.json({ message: 'Logged out successfully' });
+    });
+});
+
 // Middleware to check if user is superadmin
 const requireSuperAdmin = async (req, res, next) => {
     try {
@@ -183,6 +239,25 @@ router.put('/:id/password', requireSuperAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error updating password:', error);
         res.status(500).json({ error: 'Failed to update password' });
+    }
+});
+
+// Get current user
+router.get('/me', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const user = await User.findById(req.session.userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error fetching current user:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 });
 

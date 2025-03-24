@@ -11,22 +11,48 @@ const usersRouter = require('./routes/users');
 const { startScheduler } = require('./utils/scheduler');
 const { checkAndSendFollowUps } = require('./utils/followUpService');
 const cors = require('cors');
+const MongoStore = require('connect-mongo');
 
 const app = express();
 
+// CORS configuration
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? process.env.FRONTEND_URL 
+        : 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['set-cookie']
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+// Session configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    cookie: {
+        secure: false, // Set to true only in production with HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax',
+        path: '/'
+    },
+    name: 'sessionId',
+    store: new MongoStore({
+        mongoUrl: process.env.MONGO_URI,
+        ttl: 24 * 60 * 60, // 24 hours
+        autoRemove: 'native',
+        touchAfter: 24 * 3600 // time period in seconds
+    })
 }));
 
-// MongoDB Connection
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
@@ -152,6 +178,19 @@ app.get('/login.html', (req, res) => {
     }
 });
 
+// Add session verification endpoint
+app.get('/api/auth/me', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    res.json({
+        userId: req.session.userId,
+        username: req.session.username,
+        role: req.session.userRole
+    });
+});
+
 app.get('/signup.html', (req, res) => {
     if (req.session.userId) {
         res.redirect('/');
@@ -261,18 +300,22 @@ app.post('/api/auth/login', async (req, res) => {
         console.log('Final redirect URL:', redirectUrl);
 
         // Save session before sending response
-        req.session.save((err) => {
-            if (err) {
-                console.error('Session save error:', err);
-                return res.status(500).json({ error: 'Session error' });
-            }
-            
-            res.json({ 
-                success: true, 
-                username: user.username,
-                role: user.role,
-                redirectUrl: redirectUrl
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
             });
+        });
+        
+        res.json({ 
+            success: true, 
+            username: user.username,
+            role: user.role,
+            redirectUrl: redirectUrl
         });
     } catch (error) {
         console.error('Login error:', error);
@@ -281,8 +324,19 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy();
-    res.json({ success: true });
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Logout error:', err);
+                return res.status(500).json({ error: 'Failed to logout' });
+            }
+            res.clearCookie('sessionId');
+            res.json({ success: true });
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Failed to logout' });
+    }
 });
 
 // API Routes
@@ -675,7 +729,7 @@ setInterval(checkAndSendFollowUps, 60 * 60 * 1000);
 // Initial follow-up check
 checkAndSendFollowUps();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 }); 
