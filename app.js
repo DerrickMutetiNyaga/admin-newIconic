@@ -16,9 +16,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? process.env.FRONTEND_URL || 'https://your-production-domain.com'
-        : 'http://localhost:3000',
+    origin: 'https://admin-newiconic.onrender.com',
     credentials: true
 }));
 app.use(express.json());
@@ -31,22 +29,20 @@ const sessionConfig = {
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Enable for HTTPS
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: 'none', // Required for cross-site requests
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     },
-    name: 'sessionId' // Custom session name
+    name: 'sessionId'
 };
 
-// Use MongoDB session store in production
-if (process.env.NODE_ENV === 'production') {
-    const MongoStore = require('connect-mongo');
-    sessionConfig.store = MongoStore.create({
-        mongoUrl: process.env.MONGO_URI,
-        ttl: 24 * 60 * 60 // 24 hours
-    });
-}
+// Use MongoDB session store
+const MongoStore = require('connect-mongo');
+sessionConfig.store = MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    ttl: 24 * 60 * 60 // 24 hours
+});
 
 app.use(session(sessionConfig));
 
