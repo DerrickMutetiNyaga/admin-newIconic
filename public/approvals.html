@@ -533,30 +533,48 @@
                 });
                 const user = await response.json();
 
+                console.log('User data received:', user); // Debug log
+
                 modalTitle.textContent = 'Edit User Role & Status';
                 document.getElementById('userId').value = user._id;
                 
                 // Show all fields but make username, email, and password read-only
+                const usernameField = document.getElementById('username');
+                const emailField = document.getElementById('email');
+                const passwordField = document.getElementById('password');
+                const roleField = document.getElementById('role');
+                const statusField = document.getElementById('status');
+
+                // Make fields visible
                 document.getElementById('usernameGroup').style.display = 'block';
                 document.getElementById('emailGroup').style.display = 'block';
                 document.getElementById('passwordGroup').style.display = 'block';
                 
                 // Fill in all fields with user data
-                document.getElementById('username').value = user.username;
-                document.getElementById('email').value = user.email;
-                document.getElementById('password').value = '********'; // Placeholder for password
-                document.getElementById('role').value = user.role;
-                document.getElementById('status').value = user.status;
+                if (user.username) {
+                    usernameField.value = user.username;
+                }
+                if (user.email) {
+                    emailField.value = user.email;
+                }
+                passwordField.value = '********'; // Placeholder for password
+                roleField.value = user.role || 'user';
+                statusField.value = user.status || 'active';
                 
-                // Make username, email, and password read-only
-                document.getElementById('username').readOnly = true;
-                document.getElementById('email').readOnly = true;
-                document.getElementById('password').readOnly = true;
+                // Make fields read-only
+                usernameField.readOnly = true;
+                emailField.readOnly = true;
+                passwordField.readOnly = true;
+                
+                // Style read-only fields
+                usernameField.style.backgroundColor = '#f5f5f5';
+                emailField.style.backgroundColor = '#f5f5f5';
+                passwordField.style.backgroundColor = '#f5f5f5';
                 
                 // Remove required attributes for read-only fields
-                document.getElementById('username').required = false;
-                document.getElementById('email').required = false;
-                document.getElementById('password').required = false;
+                usernameField.required = false;
+                emailField.required = false;
+                passwordField.required = false;
 
                 showModal('userModal');
             } catch (error) {
