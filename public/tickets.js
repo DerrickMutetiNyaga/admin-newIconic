@@ -23,6 +23,7 @@ const elements = {
     nextPage: document.getElementById('nextPage'),
     pageInfo: document.getElementById('pageInfo'),
     newTicketBtn: document.getElementById('newTicketBtn'),
+    mobileNewTicketBtn: document.getElementById('mobileNewTicketBtn'),
     ticketModal: document.getElementById('ticketModal'),
     editTicketModal: document.getElementById('editTicketModal'),
     ticketForm: document.getElementById('ticketForm'),
@@ -165,6 +166,7 @@ function setupEventListeners() {
 
     // Modal events
     elements.newTicketBtn.addEventListener('click', () => showModal('ticketModal'));
+    elements.mobileNewTicketBtn.addEventListener('click', () => showModal('ticketModal'));
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', () => closeModal(btn.closest('.modal').id));
     });

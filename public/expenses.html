@@ -38,6 +38,38 @@
         .main-content.authenticated {
             display: block;
         }
+        .mobile-fab {
+            display: none;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+            z-index: 99999;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+        .mobile-fab i {
+            font-size: 20px;
+        }
+        .mobile-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        @media (max-width: 768px) {
+            .mobile-fab {
+                display: inline-flex !important;
+            }
+            .header-right {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -77,7 +109,12 @@
         <main class="main-content">
             <header>
                 <div class="header-left">
-                    <h1>Expenses</h1>
+                    <button class="mobile-nav-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Expenses <button class="mobile-fab" id="mobileNewExpenseBtn" aria-label="Add new expense">
+                        <i class="fas fa-plus"></i>
+                    </button></h1>
                     <p class="date">Today: <span id="currentDate"></span></p>
                 </div>
                 <div class="header-right">
@@ -297,6 +334,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="mobile-nav.js"></script>
     <script src="expenses.js"></script>
 </body>
 </html> 

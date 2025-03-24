@@ -4,6 +4,25 @@ let monthlyBarChart = null;
 let trendLineChart = null;
 let currentExpenseId = null;
 
+// DOM Elements
+const elements = {
+    authLoading: document.getElementById('authLoading'),
+    mainContent: document.querySelector('.main-content'),
+    searchInput: document.getElementById('searchInput'),
+    categoryFilter: document.getElementById('categoryFilter'),
+    paymentMethodFilter: document.getElementById('paymentMethodFilter'),
+    dateRangeFilter: document.getElementById('dateRangeFilter'),
+    resetFilters: document.getElementById('resetFilters'),
+    exportBtn: document.getElementById('exportBtn'),
+    exportDateRange: document.getElementById('exportDateRange'),
+    expensesList: document.getElementById('expensesList'),
+    noExpenses: document.getElementById('noExpenses'),
+    newExpenseBtn: document.getElementById('newExpenseBtn'),
+    mobileNewExpenseBtn: document.getElementById('mobileNewExpenseBtn'),
+    expenseModal: document.getElementById('expenseModal'),
+    expenseForm: document.getElementById('expenseForm')
+};
+
 // Immediately check authentication when script loads
 document.addEventListener('DOMContentLoaded', async function() {
     try {
@@ -29,10 +48,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         // Show the main content
-        document.querySelector('.main-content').classList.add('authenticated');
+        elements.mainContent.classList.add('authenticated');
         
         // Hide loading overlay
-        document.getElementById('authLoading').style.display = 'none';
+        elements.authLoading.style.display = 'none';
 
         // Initialize the page
         initializePage();
@@ -80,6 +99,7 @@ function initializePage() {
     // Add event listeners
     document.getElementById('expenseForm').addEventListener('submit', handleExpenseSubmit);
     document.getElementById('newExpenseBtn').addEventListener('click', () => openModal());
+    document.getElementById('mobileNewExpenseBtn').addEventListener('click', () => openModal());
     document.getElementById('categoryFilter').addEventListener('change', loadExpenses);
     document.getElementById('paymentMethodFilter').addEventListener('change', loadExpenses);
     document.getElementById('resetFilters').addEventListener('click', resetFilters);
