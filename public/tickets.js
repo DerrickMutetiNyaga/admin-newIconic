@@ -1,6 +1,6 @@
 // Global variables
 let currentPage = 1;
-let itemsPerPage = 10;
+let itemsPerPage = 9;
 let allTickets = [];
 let filteredTickets = [];
 let categoryChart, monthlyChart, stationChart;
@@ -429,6 +429,8 @@ function displayTickets() {
             </div>
         </div>
     `).join('');
+
+    updatePagination();
 }
 
 // Handle search
@@ -710,9 +712,17 @@ function updateCurrentDate() {
 
 function updatePagination() {
     const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+    elements.pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
     elements.prevPage.disabled = currentPage === 1;
     elements.nextPage.disabled = currentPage === totalPages;
-    elements.pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+    // Show/hide pagination based on number of tickets
+    const paginationContainer = document.querySelector('.pagination');
+    if (filteredTickets.length <= itemsPerPage) {
+        paginationContainer.style.display = 'none';
+    } else {
+        paginationContainer.style.display = 'flex';
+    }
 }
 
 function changePage(page) {
@@ -721,7 +731,9 @@ function changePage(page) {
     
     currentPage = page;
     displayTickets();
-    updatePagination();
+    
+    // Scroll to top of tickets section
+    elements.ticketsList.scrollIntoView({ behavior: 'smooth' });
 }
 
 // Update category chart based on selected time period
