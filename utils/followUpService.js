@@ -9,10 +9,12 @@ async function checkAndSendFollowUps() {
 
         // Find tickets that are:
         // 1. In Open status
-        // 2. Either never had a follow-up (lastFollowUpSent is null)
+        // 2. Created more than 24 hours ago
+        // 3. Either never had a follow-up (lastFollowUpSent is null)
         //    OR had their last follow-up more than 24 hours ago
         const ticketsNeedingFollowUp = await Ticket.find({
             status: 'Open',
+            reportedDateTime: { $lt: twentyFourHoursAgo }, // Only tickets older than 24 hours
             $or: [
                 { lastFollowUpSent: null },
                 { lastFollowUpSent: { $lt: twentyFourHoursAgo } }
@@ -38,7 +40,7 @@ async function checkAndSendFollowUps() {
             ticket.lastFollowUpSent = now;
             await ticket.save();
 
-            console.log(`Follow-up sent for ticket ${ticket._id}`);
+            console.log(`Follow-up sent for ticket ${ticket._id} after ${hoursOpen} hours`);
         }
 
         console.log(`Follow-up check completed. Processed ${ticketsNeedingFollowUp.length} tickets.`);
