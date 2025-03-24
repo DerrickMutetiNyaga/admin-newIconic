@@ -424,6 +424,49 @@
             <script src="app.js"></script>
 
             <script>
+                // Check authentication status
+                async function checkAuth() {
+                    try {
+                        const response = await fetch('/api/auth/check');
+                        const data = await response.json();
+                        
+                        if (!data.authenticated) {
+                            window.location.href = '/login.html';
+                            return;
+                        }
+
+                        // Update username display
+                        document.getElementById('username').textContent = data.username;
+
+                        // Show/hide approvals link based on role
+                        const approvalsLink = document.getElementById('approvalsLink');
+                        if (data.role === 'admin' || data.role === 'superadmin') {
+                            approvalsLink.style.display = 'block';
+                        } else {
+                            approvalsLink.style.display = 'none';
+                        }
+
+                        // Load dashboard data
+                        loadDashboardData();
+                    } catch (error) {
+                        console.error('Auth check failed:', error);
+                        window.location.href = '/login.html';
+                    }
+                }
+
+                // Call checkAuth when page loads
+                checkAuth();
+
+                // Logout handler
+                document.getElementById('logout').addEventListener('click', async () => {
+                    try {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        window.location.href = '/login.html';
+                    } catch (error) {
+                        console.error('Logout failed:', error);
+                    }
+                });
+
                 // Function to check user role and apply restrictions
                 async function checkUserRoleAndApplyRestrictions() {
                     try {

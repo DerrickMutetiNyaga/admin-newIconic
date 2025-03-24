@@ -120,26 +120,25 @@ app.use(enforceRoleAccess);
 // Routes
 app.get('/', (req, res) => {
     if (!req.session.userId) {
-        res.redirect('/login.html');
-    } else {
-        // Check user role and redirect accordingly
-        const userRole = req.session.userRole?.toLowerCase();
-        console.log('Root route - User role:', userRole);
-        
-        switch (userRole) {
-            case 'user':
-                res.redirect('/blank.html');
-                break;
-            case 'admin':
-                res.redirect('/tickets.html');
-                break;
-            case 'superadmin':
-                res.sendFile(path.join(__dirname, 'public', 'index.html'));
-                break;
-            default:
-                console.log('Unknown role, redirecting to blank.html');
-                res.redirect('/blank.html');
-        }
+        return res.redirect('/login.html');
+    }
+
+    // Check user role and redirect accordingly
+    const userRole = req.session.userRole?.toLowerCase();
+    console.log('Root route - User role:', userRole);
+    
+    switch (userRole) {
+        case 'user':
+            return res.redirect('/blank.html');
+        case 'staff':
+            return res.redirect('/tickets.html');
+        case 'admin':
+            return res.redirect('/tickets.html');
+        case 'superadmin':
+            return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        default:
+            console.log('Unknown role, redirecting to login');
+            return res.redirect('/login.html');
     }
 });
 
