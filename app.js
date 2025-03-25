@@ -84,6 +84,11 @@ const requireAuth = (req, res, next) => {
 
 // Role-based access middleware
 const enforceRoleAccess = (req, res, next) => {
+    // Allow access to reset password page without authentication
+    if (req.path === '/reset-password.html' || req.path === '/reset-password') {
+        return next();
+    }
+
     const userRole = req.session.userRole?.toLowerCase();
 
     if (userRole === 'juniorstaff') {
