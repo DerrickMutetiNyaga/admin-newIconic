@@ -231,6 +231,13 @@ function initializeCharts() {
 async function handleExpenseSubmit(e) {
     e.preventDefault();
     
+    // Get the submit button and disable it
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+    
     const expenseData = {
         name: document.getElementById('expenseName').value.trim(),
         category: document.getElementById('expenseCategory').value,
@@ -242,6 +249,11 @@ async function handleExpenseSubmit(e) {
 
     // Validate form
     if (!validateExpenseForm(expenseData)) {
+        // Re-enable the submit button if validation fails
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = currentExpenseId ? 'Update Expense' : 'Save Expense';
+        }
         return;
     }
 
@@ -352,6 +364,12 @@ async function handleExpenseSubmit(e) {
     } catch (error) {
         console.error('Error saving expense:', error);
         showNotification(error.message, 'error');
+    } finally {
+        // Re-enable the submit button and restore its original text
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = currentExpenseId ? 'Update Expense' : 'Save Expense';
+        }
     }
 }
 

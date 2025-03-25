@@ -1,7 +1,7 @@
 {
   "name": "ticketing-expense-system",
   "version": "1.0.0",
-  "description": "Ticketing & Expense Management System",
+  "description": "Administration Management System",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

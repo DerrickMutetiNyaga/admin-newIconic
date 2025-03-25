@@ -557,6 +557,13 @@ function resetFilters() {
 async function handleTicketSubmit(e) {
     e.preventDefault();
     
+    // Get the submit button and disable it
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    }
+    
     const formData = {
         clientName: document.getElementById('clientName').value,
         clientNumber: document.getElementById('clientNumber').value,
@@ -598,6 +605,12 @@ async function handleTicketSubmit(e) {
     } catch (error) {
         console.error('Error creating ticket:', error);
         showNotification(error.message || 'Error creating ticket. Please try again.', 'error');
+    } finally {
+        // Re-enable the submit button and restore its original text
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Create Ticket';
+        }
     }
 }
 
