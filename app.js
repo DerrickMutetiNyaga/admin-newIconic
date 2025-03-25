@@ -12,6 +12,10 @@ const usersRouter = require('./routes/users');
 const { startScheduler } = require('./utils/scheduler');
 const { checkAndSendFollowUps } = require('./utils/followUpService');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const { sendSMS } = require('./utils/sms');
 
 const app = express();
 
@@ -182,21 +186,21 @@ app.get('/', (req, res) => {
         return res.redirect('/login.html');
     }
 
-    // Check user role and redirect accordingly
-    const userRole = req.session.userRole?.toLowerCase();
-    console.log('Root route - User role:', userRole);
-    
-    switch (userRole) {
-        case 'user':
+        // Check user role and redirect accordingly
+        const userRole = req.session.userRole?.toLowerCase();
+        console.log('Root route - User role:', userRole);
+        
+        switch (userRole) {
+            case 'user':
             return res.redirect('/blank.html');
         case 'juniorstaff':
         case 'staff':
             return res.redirect('/tickets.html');
-        case 'admin':
+            case 'admin':
             return res.redirect('/tickets.html');
-        case 'superadmin':
+            case 'superadmin':
             return res.sendFile(path.join(__dirname, 'public', 'index.html'));
-        default:
+            default:
             console.log('Unknown role, redirecting to login');
             return res.redirect('/login.html');
     }
@@ -676,34 +680,6 @@ app.get('/api/tickets/open', requireAuth, async (req, res) => {
     }
 });
 
-// SMS Function
-async function sendSMS(phoneNumber, message) {
-    try {
-        const formData = new URLSearchParams();
-        formData.append('userid', process.env.ZETTATEL_USERNAME);
-        formData.append('password', encodeURIComponent(process.env.ZETTATEL_PASSWORD));
-        formData.append('sendMethod', 'quick');
-        formData.append('mobile', phoneNumber);
-        formData.append('msg', message);
-        formData.append('senderid', process.env.SENDER_ID);
-        formData.append('msgType', 'text');
-        formData.append('duplicatecheck', 'true');
-        formData.append('output', 'json');
-
-        const response = await axios.post(process.env.ZETTATEL_API_URL, formData, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-
-        console.log(`SMS sent to ${phoneNumber}:`, response.data);
-        return response.data;
-    } catch (error) {
-        console.error(`Error sending SMS to ${phoneNumber}:`, error.response ? error.response.data : error.message);
-        throw error;
-    }
-}
-
 // Start the follow-up scheduler
 startScheduler();
 
@@ -712,6 +688,133 @@ setInterval(checkAndSendFollowUps, 60 * 60 * 1000);
 
 // Initial follow-up check
 checkAndSendFollowUps();
+
+// Rate limiting middleware
+const recoveryLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 3, // 3 attempts per hour (back to production setting)
+    message: { error: 'Too many recovery attempts. Please try again later.' }
+});
+
+// Email transporter configuration
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: true,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+// Verify username route
+app.post('/api/auth/verify-username', recoveryLimiter, async (req, res) => {
+    try {
+        const { username } = req.body;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Username not found' });
+        }
+
+        // Return both masked and full email for verification
+        const [emailUsername, domain] = user.email.split('@');
+        const maskedEmail = `${emailUsername.charAt(0)}${'*'.repeat(emailUsername.length - 2)}${emailUsername.charAt(emailUsername.length - 1)}@${domain}`;
+
+        res.json({ 
+            success: true,
+            maskedEmail,
+            fullEmail: user.email
+        });
+    } catch (error) {
+        console.error('Error verifying username:', error);
+        res.status(500).json({ error: 'An error occurred while verifying username' });
+    }
+});
+
+// Forgot password route
+app.post('/api/auth/forgot-password', recoveryLimiter, async (req, res) => {
+    try {
+        const { username, email, phone } = req.body;
+        const user = await User.findOne({ username, email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Invalid username or email' });
+        }
+
+        // Check if user can attempt recovery
+        if (!user.canAttemptRecovery()) {
+            return res.status(429).json({ 
+                error: 'Too many recovery attempts. Please try again later.' 
+            });
+        }
+
+        // Generate recovery token
+        const token = await user.generateRecoveryToken();
+        
+        // Create recovery URL
+        const recoveryUrl = `${process.env.BASE_URL}/reset-password.html?token=${token}`;
+        
+        // Format phone number (remove any non-digit characters and ensure it starts with country code)
+        let formattedPhone = phone.replace(/\D/g, '');
+        if (!formattedPhone.startsWith('254')) {
+            formattedPhone = '254' + formattedPhone.replace(/^0+/, '');
+        }
+        formattedPhone = '+' + formattedPhone;
+        
+        // Send SMS with recovery link
+        const smsMessage = `Your password recovery link: ${recoveryUrl}. This link will expire in 1 hour.`;
+        
+        try {
+            await sendSMS(smsMessage, formattedPhone);
+        } catch (smsError) {
+            console.error('Error sending SMS:', smsError);
+            return res.status(500).json({ error: 'Failed to send recovery link via SMS' });
+        }
+
+        // Increment recovery attempts
+        await user.incrementRecoveryAttempts();
+
+        res.json({ 
+            success: true,
+            message: 'Recovery link has been sent to your phone number'
+        });
+    } catch (error) {
+        console.error('Error in forgot password:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+});
+
+// Reset password route
+app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        // Find user with valid recovery token
+        const user = await User.findOne({
+            recoveryToken: token,
+            recoveryTokenExpiry: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired recovery token' });
+        }
+
+        // Update password and clear recovery token
+        user.password = newPassword;
+        user.recoveryToken = undefined;
+        user.recoveryTokenExpiry = undefined;
+        await user.save();
+
+        res.json({ 
+            success: true,
+            message: 'Password has been reset successfully'
+        });
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        res.status(500).json({ error: 'An error occurred while resetting your password' });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

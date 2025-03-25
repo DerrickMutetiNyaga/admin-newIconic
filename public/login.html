@@ -130,6 +130,23 @@
             padding: 10px;
             border-radius: 5px;
         }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 8px;
+        }
+
+        .forgot-password a {
+            color: #2d8659;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .forgot-password a:hover {
+            color: #1a472a;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -147,6 +164,9 @@
                 <div class="form-group">
                     <label for="password"><i class="fas fa-lock"></i> Password</label>
                     <input type="password" id="password" name="password" required>
+                    <div class="forgot-password">
+                        <a href="/forgot-password.html">Forgot Password?</a>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">
