@@ -177,6 +177,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
 
             try {
                 const response = await fetch('/api/auth/login', {
@@ -191,17 +192,52 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    const sessionCheck = await fetch('/api/auth/check', {
-                        credentials: 'include'
-                    });
-                    const sessionData = await sessionCheck.json();
+                    // Show success message
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
                     
-                    if (sessionData.authenticated) {
-                        window.location.href = data.redirectUrl;
-                    } else {
-                        errorMessage.textContent = 'Session not established. Please try again.';
-                        errorMessage.style.display = 'block';
-                    }
+                    // Store user info in sessionStorage
+                    sessionStorage.setItem('username', data.username);
+                    sessionStorage.setItem('role', data.role);
+
+                    // Wait for 2 seconds to show the success message
+                    setTimeout(async () => {
+                        try {
+                            const sessionCheck = await fetch('/api/auth/check', {
+                                credentials: 'include'
+                            });
+                            const sessionData = await sessionCheck.json();
+                            
+                            if (sessionData.authenticated) {
+                                const role = sessionData.role.toLowerCase();
+                                
+                                // Define allowed roles and their redirects
+                                const redirects = {
+                                    'juniorstaff': '/tickets.html',
+                                    'staff': '/tickets.html',
+                                    'admin': '/tickets.html',
+                                    'superadmin': '/index.html'
+                                };
+                                
+                                // If user has an allowed role, redirect them
+                                if (redirects[role]) {
+                                    window.location.href = redirects[role];
+                                } else {
+                                    // For any other role, redirect to blank.html
+                                    window.location.href = '/blank.html';
+                                }
+                            } else {
+                                errorMessage.textContent = 'Session not established. Please try again.';
+                                errorMessage.style.display = 'block';
+                                successMessage.style.display = 'none';
+                            }
+                        } catch (error) {
+                            console.error('Session check error:', error);
+                            errorMessage.textContent = 'Error checking session. Please try again.';
+                            errorMessage.style.display = 'block';
+                            successMessage.style.display = 'none';
+                        }
+                    }, 2000); // 2 second delay
                 } else {
                     errorMessage.textContent = data.error || 'Login failed';
                     errorMessage.style.display = 'block';
