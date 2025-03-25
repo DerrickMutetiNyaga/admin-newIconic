@@ -118,8 +118,8 @@ async function checkUserRoleAndApplyRestrictions() {
         const data = await response.json();
         
         // Hide expenses link and dashboard link by default for restricted roles
-        const expensesLink = document.querySelector('a[href="expenses.html"]');
-        const dashboardLink = document.querySelector('a[href="index.html"]');
+            const expensesLink = document.querySelector('a[href="expenses.html"]');
+            const dashboardLink = document.querySelector('a[href="index.html"]');
         const newTicketBtn = document.getElementById('newTicketBtn');
         const mobileNewTicketBtn = document.getElementById('mobileNewTicketBtn');
         const usernameElement = document.getElementById('username');
@@ -429,62 +429,62 @@ function displayTickets() {
             const isJuniorStaff = userRole === 'juniorstaff';
             const isStaff = userRole === 'staff';
 
-            elements.ticketsList.innerHTML = pageTickets.map(ticket => `
-                <div class="ticket-card">
-                    <div class="ticket-header">
-                        <span class="ticket-id">#${ticket._id.slice(-6)}</span>
-                        <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
-                    </div>
-                    <div class="ticket-body">
-                        <div class="ticket-client">
-                            <div class="client-name">${ticket.clientName}</div>
-                            <div class="client-details">
-                                <div class="client-detail-item">
-                                    <i class="fas fa-phone"></i>
-                                    <a href="tel:${ticket.clientNumber}" class="phone-link">
-                                        <span>${ticket.clientNumber}</span>
-                                    </a>
-                                </div>
-                                <div class="client-detail-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    ${ticket.stationLocation}
-                                </div>
-                                <div class="client-detail-item">
-                                    <i class="fas fa-home"></i>
-                                    ${ticket.houseNumber}
-                                </div>
-                            </div>
+    elements.ticketsList.innerHTML = pageTickets.map(ticket => `
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <span class="ticket-id">#${ticket._id.slice(-6)}</span>
+                <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+            </div>
+            <div class="ticket-body">
+                <div class="ticket-client">
+                    <div class="client-name">${ticket.clientName}</div>
+                    <div class="client-details">
+                        <div class="client-detail-item">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:${ticket.clientNumber}" class="phone-link">
+                                <span>${ticket.clientNumber}</span>
+                            </a>
                         </div>
+                        <div class="client-detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                                    ${ticket.stationLocation}
+                        </div>
+                        <div class="client-detail-item">
+                            <i class="fas fa-home"></i>
+                                    ${ticket.houseNumber}
+                        </div>
+                    </div>
+                </div>
                         <span class="ticket-category ${ticket.category.toLowerCase().replace(/\s+/g, '-')}">${ticket.category}</span>
-                        <div class="ticket-description">
+                <div class="ticket-description">
                             <strong>Problem:</strong>
                             ${ticket.problemDescription}
-                        </div>
-                        ${ticket.problemCorrected ? `
-                            <div class="ticket-solution">
+                </div>
+                ${ticket.problemCorrected ? `
+                <div class="ticket-solution">
                                 <strong>Solution:</strong>
                                 ${ticket.problemCorrected}
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div class="ticket-footer">
+                </div>
+                ` : ''}
+            </div>
+            <div class="ticket-footer">
                         <span class="ticket-date">
                             <i class="far fa-clock"></i>
                             ${formatDate(ticket.reportedDateTime)}
                         </span>
-                        <div class="ticket-actions">
+                <div class="ticket-actions">
                             <button class="ticket-action-btn edit" onclick="openEditModal('${ticket._id}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
                             ${(!isJuniorStaff && !isStaff) ? `
-                                <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
+                    <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
                             ` : ''}
-                        </div>
-                    </div>
                 </div>
-            `).join('');
+            </div>
+        </div>
+    `).join('');
         })
         .catch(error => {
             console.error('Error fetching user role:', error);
@@ -681,7 +681,7 @@ async function openEditModal(ticketId) {
         // Show/hide problem corrected field based on status
         const problemCorrectedGroup = document.getElementById('problemCorrectedGroup');
         if (problemCorrectedGroup) {
-            problemCorrectedGroup.style.display = ticket.status === 'Resolved' ? 'block' : 'none';
+        problemCorrectedGroup.style.display = ticket.status === 'Resolved' ? 'block' : 'none';
             if (ticket.status === 'Resolved') {
                 document.getElementById('problemCorrected').value = ticket.problemCorrected || '';
             }

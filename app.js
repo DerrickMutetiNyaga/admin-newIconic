@@ -84,14 +84,6 @@ const requireAuth = (req, res, next) => {
 
 // Role-based access middleware
 const enforceRoleAccess = (req, res, next) => {
-    console.log('Accessing path:', req.path); // Debug log
-    
-    // Allow access to reset password page without authentication
-    if (req.path === '/reset-password.html' || req.path === '/reset-password') {
-        console.log('Allowing access to reset password page'); // Debug log
-        return next();
-    }
-
     const userRole = req.session.userRole?.toLowerCase();
 
     if (userRole === 'juniorstaff') {
@@ -185,6 +177,9 @@ const enforceRoleAccess = (req, res, next) => {
     next();
 };
 
+// Add the middleware to your app
+app.use(enforceRoleAccess);
+
 // Routes
 app.get('/', (req, res) => {
     if (!req.session.userId) {
@@ -227,15 +222,6 @@ app.get('/signup.html', (req, res) => {
         res.sendFile(path.join(__dirname, 'public', 'signup.html'));
     }
 });
-
-// Reset password page route - moved before enforceRoleAccess
-app.get('/reset-password.html', (req, res) => {
-    console.log('Handling reset-password.html request'); // Debug log
-    res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
-});
-
-// Add the middleware after the reset password route
-app.use(enforceRoleAccess);
 
 app.get('/api/auth/check', (req, res) => {
     if (!req.session.userId) {
