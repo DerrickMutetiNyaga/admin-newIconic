@@ -223,6 +223,11 @@ app.get('/signup.html', (req, res) => {
     }
 });
 
+// Reset password page route
+app.get('/reset-password.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+});
+
 app.get('/api/auth/check', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
