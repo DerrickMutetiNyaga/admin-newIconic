@@ -32,7 +32,8 @@ const elements = {
     customDateRange: document.getElementById('customDateRange'),
     applyDateRange: document.getElementById('applyDateRange'),
     categoryMonthSelect: document.getElementById('categoryMonthSelect'),
-    stationMonthSelect: document.getElementById('stationMonthSelect')
+    stationMonthSelect: document.getElementById('stationMonthSelect'),
+    pagination: document.querySelector('.pagination')
 };
 
 // Initialize the page
@@ -92,6 +93,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize charts
         initializeCharts();
         
+        // Initialize pagination controls
+        if (elements.prevPage && elements.nextPage) {
+            elements.prevPage.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayTickets();
+                }
+            });
+
+            elements.nextPage.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayTickets();
+                }
+            });
+        }
+
         // Load initial data
         await loadTickets();
         
@@ -190,68 +209,160 @@ function initializeDatePickers() {
 
 // Initialize charts
 function initializeCharts() {
+    console.log('Initializing charts...');
+    
     // Category Pie Chart
-    const categoryCtx = document.getElementById('categoryPieChart').getContext('2d');
-    categoryChart = new Chart(categoryCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Installation', 'LOS', 'Other'],
-            datasets: [{
-                data: [0, 0, 0],
-                backgroundColor: ['#3498db', '#e74c3c', '#2ecc71']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    const categoryCtx = document.getElementById('categoryPieChart');
+    if (categoryCtx) {
+        console.log('Initializing category chart...');
+        try {
+            // Clear any existing chart
+            if (categoryChart) {
+                categoryChart.destroy();
             }
+            
+            categoryChart = new Chart(categoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Installation', 'LOS', 'Other'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#3498db', '#e74c3c', '#2ecc71'],
+                        borderWidth: 1,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('Category chart initialized successfully');
+        } catch (error) {
+            console.error('Error initializing category chart:', error);
         }
-    });
-
-    // Add event listener for month selection
-    document.getElementById('categoryMonthSelect').addEventListener('change', updateCategoryChart);
+    }
 
     // Monthly Bar Chart
-    const monthlyCtx = document.getElementById('monthlyBarChart').getContext('2d');
-    monthlyChart = new Chart(monthlyCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'Tickets',
-                data: Array(12).fill(0),
-                backgroundColor: '#3498db'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+    const monthlyCtx = document.getElementById('monthlyBarChart');
+    if (monthlyCtx) {
+        console.log('Initializing monthly chart...');
+        try {
+            // Clear any existing chart
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+            
+            monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Tickets',
+                        data: Array(12).fill(0),
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            console.log('Monthly chart initialized successfully');
+        } catch (error) {
+            console.error('Error initializing monthly chart:', error);
         }
-    });
+    }
 
     // Station Doughnut Chart
-    const stationCtx = document.getElementById('stationDoughnutChart').getContext('2d');
-    stationChart = new Chart(stationCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['NYS GILGI', 'NYS NAIVASHA', 'MARRIEDQUARTERS', '5KRMAIN CAMP'],
-            datasets: [{
-                data: Array(4).fill(0),
-                backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+    const stationCtx = document.getElementById('stationDoughnutChart');
+    if (stationCtx) {
+        console.log('Initializing station chart...');
+        try {
+            // Clear any existing chart
+            if (stationChart) {
+                stationChart.destroy();
+            }
+            
+            stationChart = new Chart(stationCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['NYS GILGI', 'NYS NAIVASHA', 'MARRIEDQUARTERS', '5KRMAIN CAMP'],
+                    datasets: [{
+                        data: Array(4).fill(0),
+                        backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f'],
+                        borderWidth: 1,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('Station chart initialized successfully');
+        } catch (error) {
+            console.error('Error initializing station chart:', error);
         }
-    });
-
-    // Initialize custom date picker
-    initializeCustomDatePicker();
+    }
 }
 
 // Setup event listeners
@@ -263,10 +374,6 @@ function setupEventListeners() {
     elements.stationFilter.addEventListener('change', handleFilters);
     elements.dateRangeFilter.addEventListener('change', handleFilters);
     elements.resetFilters.addEventListener('click', resetFilters);
-
-    // Pagination events
-    elements.prevPage.addEventListener('click', () => changePage(currentPage - 1));
-    elements.nextPage.addEventListener('click', () => changePage(currentPage + 1));
 
     // Modal events
     elements.newTicketBtn.addEventListener('click', () => showModal('ticketModal'));
@@ -336,10 +443,12 @@ function setupEventListeners() {
 // Load tickets from API
 async function loadTickets() {
     try {
+        console.log('Loading tickets...');
         const response = await fetch('/api/tickets');
         if (!response.ok) throw new Error('Failed to fetch tickets');
         
         allTickets = await response.json();
+        console.log('Loaded tickets:', allTickets.length);
         
         // Sort tickets: Open tickets first, then by creation time
         filteredTickets = [...allTickets].sort((a, b) => {
@@ -382,115 +491,178 @@ function updateStats() {
 
 // Update charts
 function updateCharts() {
-    updateCategoryChart();
-    updateStationChart();
+    console.log('Updating charts...');
+    
+    // Update category chart
+    if (categoryChart) {
+        console.log('Updating category chart...');
+        try {
+            const categoryData = {
+                Installation: filteredTickets.filter(t => t.category?.toLowerCase() === 'installation').length,
+                LOS: filteredTickets.filter(t => t.category?.toLowerCase() === 'los').length,
+                Other: filteredTickets.filter(t => !['installation', 'los'].includes(t.category?.toLowerCase())).length
+            };
+            
+            categoryChart.data.datasets[0].data = Object.values(categoryData);
+            categoryChart.update();
+            console.log('Category data:', categoryData);
+            
+            // Update legend counts
+            document.getElementById('installationCount').textContent = `${categoryData.Installation} (${calculatePercentage(categoryData.Installation, Object.values(categoryData).reduce((a, b) => a + b, 0))}%)`;
+            document.getElementById('losCount').textContent = `${categoryData.LOS} (${calculatePercentage(categoryData.LOS, Object.values(categoryData).reduce((a, b) => a + b, 0))}%)`;
+            document.getElementById('otherCount').textContent = `${categoryData.Other} (${calculatePercentage(categoryData.Other, Object.values(categoryData).reduce((a, b) => a + b, 0))}%)`;
+        } catch (error) {
+            console.error('Error updating category chart:', error);
+        }
+    }
 
-    // Monthly distribution
-    const monthlyData = Array(12).fill(0);
-    filteredTickets.forEach(ticket => {
-        const date = new Date(ticket.reportedDateTime);
-        monthlyData[date.getMonth()]++;
-    });
+    // Update monthly chart
+    if (monthlyChart) {
+        console.log('Updating monthly chart...');
+        try {
+            const monthlyData = Array(12).fill(0);
+            const currentYear = new Date().getFullYear();
+            
+            filteredTickets.forEach(ticket => {
+                const date = new Date(ticket.reportedDateTime);
+                if (date.getFullYear() === currentYear) {
+                    monthlyData[date.getMonth()]++;
+                }
+            });
 
-    monthlyChart.data.datasets[0].data = monthlyData;
-    monthlyChart.update();
+            monthlyChart.data.datasets[0].data = monthlyData;
+            monthlyChart.update();
+            console.log('Monthly data:', monthlyData);
+        } catch (error) {
+            console.error('Error updating monthly chart:', error);
+        }
+    }
+
+    // Update station chart
+    if (stationChart) {
+        console.log('Updating station chart...');
+        try {
+            const stationData = {
+                'NYS GILGI': filteredTickets.filter(t => t.stationLocation === 'NYS GILGI').length,
+                'NYS NAIVASHA': filteredTickets.filter(t => t.stationLocation === 'NYS NAIVASHA').length,
+                'MARRIEDQUARTERS': filteredTickets.filter(t => t.stationLocation === 'MARRIEDQUARTERS').length,
+                '5KRMAIN CAMP': filteredTickets.filter(t => t.stationLocation === '5KRMAIN CAMP').length
+            };
+            
+            stationChart.data.datasets[0].data = Object.values(stationData);
+            stationChart.update();
+            console.log('Station data:', stationData);
+        } catch (error) {
+            console.error('Error updating station chart:', error);
+        }
+    }
+}
+
+// Helper function to calculate percentage
+function calculatePercentage(value, total) {
+    if (total === 0) return 0;
+    return Math.round((value / total) * 100);
 }
 
 // Display tickets in the grid
-function displayTickets() {
-    // Sort tickets: Open tickets first, then by creation time (newest first)
-    const sortedTickets = [...filteredTickets].sort((a, b) => {
-        // First, prioritize Open tickets
-        if (a.status === 'Open' && b.status !== 'Open') return -1;
-        if (a.status !== 'Open' && b.status === 'Open') return 1;
+async function displayTickets() {
+    try {
+        console.log('Displaying tickets. Total:', filteredTickets.length);
         
-        // Then sort by reportedDateTime (newest first)
-        return new Date(b.reportedDateTime) - new Date(a.reportedDateTime);
-    });
-
-    // Apply pagination to sorted tickets
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const pageTickets = sortedTickets.slice(startIndex, endIndex);
-
-    if (pageTickets.length === 0) {
-        elements.ticketsList.innerHTML = '';
-        elements.noTickets.style.display = 'block';
-        return;
-    }
-
-    elements.noTickets.style.display = 'none';
-
-    // Get user role for conditional rendering
-    fetch('/api/auth/check', { credentials: 'include' })
-        .then(response => response.json())
-        .then(data => {
-            const userRole = data.role;
-            const isJuniorStaff = userRole === 'juniorstaff';
-            const isStaff = userRole === 'staff';
-
-    elements.ticketsList.innerHTML = pageTickets.map(ticket => `
-        <div class="ticket-card">
-            <div class="ticket-header">
-                <span class="ticket-id">#${ticket._id.slice(-6)}</span>
-                <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
-            </div>
-            <div class="ticket-body">
-                <div class="ticket-client">
-                    <div class="client-name">${ticket.clientName}</div>
-                    <div class="client-details">
-                        <div class="client-detail-item">
-                            <i class="fas fa-phone"></i>
-                            <a href="tel:${ticket.clientNumber}" class="phone-link">
-                                <span>${ticket.clientNumber}</span>
-                            </a>
-                        </div>
-                        <div class="client-detail-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                                    ${ticket.stationLocation}
-                        </div>
-                        <div class="client-detail-item">
-                            <i class="fas fa-home"></i>
-                                    ${ticket.houseNumber}
-                        </div>
-                    </div>
-                </div>
-                        <span class="ticket-category ${ticket.category.toLowerCase().replace(/\s+/g, '-')}">${ticket.category}</span>
-                <div class="ticket-description">
-                            <strong>Problem:</strong>
-                            ${ticket.problemDescription}
-                </div>
-                ${ticket.problemCorrected ? `
-                <div class="ticket-solution">
-                                <strong>Solution:</strong>
-                                ${ticket.problemCorrected}
-                </div>
-                ` : ''}
-            </div>
-            <div class="ticket-footer">
-                        <span class="ticket-date">
-                            <i class="far fa-clock"></i>
-                            ${formatDate(ticket.reportedDateTime)}
-                        </span>
-                <div class="ticket-actions">
-                            <button class="ticket-action-btn edit" onclick="openEditModal('${ticket._id}')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                            ${(!isJuniorStaff && !isStaff) ? `
-                    <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                            ` : ''}
-                </div>
-            </div>
-        </div>
-    `).join('');
-        })
-        .catch(error => {
-            console.error('Error fetching user role:', error);
+        // Sort tickets: Open tickets first, then by creation time (newest first)
+        const sortedTickets = [...filteredTickets].sort((a, b) => {
+            if (a.status === 'Open' && b.status !== 'Open') return -1;
+            if (a.status !== 'Open' && b.status === 'Open') return 1;
+            return new Date(b.reportedDateTime) - new Date(a.reportedDateTime);
         });
 
-    updatePagination();
+        // Apply pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageTickets = sortedTickets.slice(startIndex, endIndex);
+
+        // Show/hide no tickets message
+        if (filteredTickets.length === 0) {
+            elements.ticketsList.innerHTML = '';
+            elements.noTickets.style.display = 'block';
+            updatePagination(); // Still update pagination even with no tickets
+            return;
+        }
+
+        elements.noTickets.style.display = 'none';
+
+        // Get user role
+        const response = await fetch('/api/auth/check', { credentials: 'include' });
+        const data = await response.json();
+        const userRole = data.role?.toLowerCase();
+        const isJuniorStaff = userRole === 'juniorstaff';
+        const isStaff = userRole === 'staff';
+
+        // Render tickets
+        elements.ticketsList.innerHTML = pageTickets.map(ticket => `
+            <div class="ticket-card">
+                <div class="ticket-header">
+                    <span class="ticket-id">#${ticket._id.slice(-6)}</span>
+                    <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                </div>
+                <div class="ticket-body">
+                    <div class="ticket-client">
+                        <div class="client-name">${ticket.clientName}</div>
+                        <div class="client-details">
+                            <div class="client-detail-item">
+                                <i class="fas fa-phone"></i>
+                                <a href="tel:${ticket.clientNumber}" class="phone-link">
+                                    <span>${ticket.clientNumber}</span>
+                                </a>
+                            </div>
+                            <div class="client-detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${ticket.stationLocation}
+                            </div>
+                            <div class="client-detail-item">
+                                <i class="fas fa-home"></i>
+                                ${ticket.houseNumber}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="ticket-category ${ticket.category.toLowerCase().replace(/\s+/g, '-')}">${ticket.category}</span>
+                    <div class="ticket-description">
+                        <strong>Problem:</strong>
+                        ${ticket.problemDescription}
+                    </div>
+                    ${ticket.problemCorrected ? `
+                    <div class="ticket-solution">
+                        <strong>Solution:</strong>
+                        ${ticket.problemCorrected}
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="ticket-footer">
+                    <span class="ticket-date">
+                        <i class="far fa-clock"></i>
+                        ${formatDate(ticket.reportedDateTime)}
+                    </span>
+                    <div class="ticket-actions">
+                        <button class="ticket-action-btn edit" onclick="openEditModal('${ticket._id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        ${(!isJuniorStaff && !isStaff) ? `
+                        <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Update pagination after displaying tickets
+        updatePagination();
+        
+    } catch (error) {
+        console.error('Error displaying tickets:', error);
+        showNotification('Error displaying tickets. Please refresh the page.', 'error');
+    }
 }
 
 // Handle search
@@ -796,18 +968,20 @@ function updateCurrentDate() {
 }
 
 function updatePagination() {
-    const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+    if (!elements.pagination || !elements.pageInfo || !elements.prevPage || !elements.nextPage) {
+        console.error('Pagination elements not found');
+        return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(filteredTickets.length / itemsPerPage));
+    currentPage = Math.min(currentPage, totalPages); // Ensure current page is valid
+    
     elements.pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
     elements.prevPage.disabled = currentPage === 1;
     elements.nextPage.disabled = currentPage === totalPages;
 
-    // Show/hide pagination based on number of tickets
-    const paginationContainer = document.querySelector('.pagination');
-    if (filteredTickets.length <= itemsPerPage) {
-        paginationContainer.style.display = 'none';
-    } else {
-        paginationContainer.style.display = 'flex';
-    }
+    // Always show pagination controls, even with one page
+    elements.pagination.style.display = 'flex';
 }
 
 function changePage(page) {
@@ -823,6 +997,8 @@ function changePage(page) {
 
 // Update category chart based on selected time period
 function updateCategoryChart() {
+    if (!categoryChart) return;
+
     const timePeriod = elements.categoryMonthSelect.value;
     const now = new Date();
     let startDate, endDate;
@@ -865,16 +1041,16 @@ function updateCategoryChart() {
         return ticketDate >= startDate && ticketDate <= endDate;
     });
 
-    // Calculate category counts
+    // Calculate category counts (case-insensitive)
     const categoryData = {
-        Installation: filteredTicketsByDate.filter(t => t.category === 'Installation').length,
-        LOS: filteredTicketsByDate.filter(t => t.category === 'LOS').length,
-        Other: filteredTicketsByDate.filter(t => t.category === 'Other').length
+        Installation: filteredTicketsByDate.filter(t => t.category?.toLowerCase() === 'installation').length,
+        LOS: filteredTicketsByDate.filter(t => t.category?.toLowerCase() === 'los').length,
+        Other: filteredTicketsByDate.filter(t => !['installation', 'los'].includes(t.category?.toLowerCase())).length
     };
 
     // Update chart data
     categoryChart.data.datasets[0].data = Object.values(categoryData);
-    categoryChart.update();
+    categoryChart.update('none'); // Use 'none' mode for better performance
 
     // Update legend counts
     document.getElementById('installationCount').textContent = categoryData.Installation;
@@ -896,6 +1072,11 @@ function updateCategoryChart() {
             const count = item.querySelector('.legend-count');
             count.textContent = `${categoryData[category]} (${performanceMetrics[category]}%)`;
         });
+    } else {
+        // Reset counts if no data
+        document.querySelectorAll('.legend-count').forEach(count => {
+            count.textContent = '0 (0%)';
+        });
     }
 }
 
@@ -910,6 +1091,8 @@ function initializeCustomDatePicker() {
 
 // Update the updateStationChart function
 function updateStationChart() {
+    if (!stationChart) return;
+
     const timePeriod = elements.stationMonthSelect.value;
     const now = new Date();
     let startDate, endDate;
@@ -959,5 +1142,5 @@ function updateStationChart() {
 
     // Update chart data
     stationChart.data.datasets[0].data = Object.values(stationData);
-    stationChart.update();
+    stationChart.update('none'); // Use 'none' mode for better performance
 } 
