@@ -246,7 +246,7 @@
                                     // For any other role, redirect to blank.html
                                     window.location.href = '/blank.html';
                                 }
-                            } else {
+                    } else {
                                 errorMessage.textContent = 'Session not established. Please try again.';
                                 errorMessage.style.display = 'block';
                                 successMessage.style.display = 'none';
@@ -254,9 +254,9 @@
                         } catch (error) {
                             console.error('Session check error:', error);
                             errorMessage.textContent = 'Error checking session. Please try again.';
-                            errorMessage.style.display = 'block';
+                        errorMessage.style.display = 'block';
                             successMessage.style.display = 'none';
-                        }
+                    }
                     }, 2000); // 2 second delay
                 } else {
                     errorMessage.textContent = data.error || 'Login failed';

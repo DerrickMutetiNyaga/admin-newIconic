@@ -9,6 +9,8 @@ const bcrypt = require('bcryptjs');
 const XLSX = require('xlsx');
 const ticketsRouter = require('./routes/tickets');
 const usersRouter = require('./routes/users');
+const equipmentRouter = require('./routes/equipment');
+const equipmentAssignmentsRouter = require('./routes/equipment-assignments');
 const { startScheduler } = require('./utils/scheduler');
 const { checkAndSendFollowUps } = require('./utils/followUpService');
 const cors = require('cors');
@@ -16,6 +18,7 @@ const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { sendSMS } = require('./utils/sms');
+const stationsRouter = require('./routes/stations');
 
 const app = express();
 
@@ -330,6 +333,9 @@ app.post('/api/auth/logout', (req, res) => {
 // API Routes
 app.use('/api/tickets', ticketsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/equipment', equipmentRouter);
+app.use('/api/equipment-assignments', equipmentAssignmentsRouter);
+app.use('/api/stations', stationsRouter);
 
 // Excel Export endpoint
 app.get('/api/tickets/export', requireAuth, async (req, res) => {

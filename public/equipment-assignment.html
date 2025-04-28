@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Assignment</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Custom sidebar styles */
+        .sidebar {
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+            color: white;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar .nav-links a {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+        }
+        
+        .sidebar .logo h2 {
+            color: white;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+        
+        .sidebar .logo p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        
+        .sidebar .user-profile {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 15px;
+        }
+        
+        .sidebar .logout-btn {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .logout-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .sidebar .nav-links i {
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Reuse existing styles from equipment.html */
+        .modal {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        .modal-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header h2 i {
+            color: #666;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Form Styles */
+        #assignmentForm {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .form-group label i {
+            color: #666;
+            margin-right: 5px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .input-group:focus-within {
+            border-color: #666;
+        }
+
+        .input-group-text {
+            padding: 8px 12px;
+            color: #666;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+        }
+
+        .input-group input,
+        .input-group select {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: white;
+            font-size: 0.95em;
+            color: #333;
+            width: 100%;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+        }
+
+        .input-group input::placeholder {
+            color: #999;
+        }
+
+        /* Assignment Type Toggle */
+        .assignment-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .assignment-type label {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .assignment-type input[type="radio"] {
+            display: none;
+        }
+
+        .assignment-type input[type="radio"]:checked + label {
+            background: #333;
+            color: white;
+            border-color: #333;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+        }
+
+        /* Required Field Indicator */
+        .form-group label::after {
+            content: '*';
+            color: #666;
+            margin-left: 4px;
+        }
+
+        /* Error States */
+        .input-group.error {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85em;
+            margin-top: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10px auto;
+            }
+
+            #assignmentForm {
+                padding: 15px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Assignment Card Grid Layout */
+        .assignments-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        @media (max-width: 900px) {
+            .assignments-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .assignments-list {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+        }
+        .assignment-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            max-width: 100%;
+        }
+        .assignment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52,152,219,0.15);
+            border-color: #3498db;
+        }
+        .assignment-header {
+            padding: 18px 20px 10px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+        .assignment-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .assignment-header .mac-address {
+            font-size: 0.92em;
+            color: #1976d2;
+            background: #e3f2fd;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        .assignment-details {
+            padding: 18px 20px 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.98em;
+            color: #223046;
+            background: #f8f9fa;
+            border-radius: 7px;
+            padding: 8px 12px;
+        }
+        .detail-item i {
+            color: #3498db;
+            font-size: 1.1em;
+            background: #e3f2fd;
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .assignment-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            padding: 10px 20px 15px 20px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            color: #666;
+        }
+        .btn-icon:hover {
+            background: #e3f2fd;
+            color: #3498db;
+        }
+        .btn-icon.delete:hover {
+            color: #e74c3c;
+            background: #fde8e8;
+        }
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 2px dashed #e0e0e0;
+        }
+        .no-data i {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 15px;
+            background: #e3f2fd;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+        .no-data p {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .no-data span {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Improved mobile assignment controls */
+        .assignment-controls {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(52,152,219,0.06);
+            padding: 18px 24px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+            .section-header h2 {
+                margin-bottom: 10px;
+                text-align: left;
+                width: 100%;
+            }
+            .assignment-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+                background: transparent;
+                margin-bottom: 18px;
+            }
+            .assignment-controls .search-box,
+            .assignment-controls .export-btn {
+                width: 100%;
+                margin: 0;
+            }
+            .assignment-controls .search-box {
+                background: #fff;
+                border-radius: 8px;
+                padding: 10px 12px;
+                box-shadow: 0 1px 3px rgba(52,152,219,0.04);
+            }
+            .assignment-controls .export-btn {
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(52,152,219,0.04);
+                font-size: 1em;
+                padding: 12px 0;
+            }
+        }
+        .assignment-controls .search-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(52,152,219,0.04);
+        }
+        .assignment-controls .styled-search {
+            border: none;
+            background: transparent;
+            flex: 1;
+            font-size: 1em;
+            outline: none;
+        }
+        .assignment-controls .export-btn {
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(52,152,219,0.04);
+            font-size: 1em;
+            padding: 10px 0;
+        }
+        /* Floating Action Button for mobile */
+        .mobile-fab {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #3498db;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(52,152,219,0.18);
+            border: none;
+            cursor: pointer;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .mobile-fab:hover {
+            background: #2980b9;
+            box-shadow: 0 6px 16px rgba(52,152,219,0.28);
+        }
+        @media (max-width: 768px) {
+            .mobile-fab { display: flex !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication loading overlay -->
+    <div class="auth-loading" id="authLoading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>ICONIC</h2>
+                <p>Administration Management</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
+                <li><a href="expenses.html"><i class="fas fa-receipt"></i> Expenses</a></li>
+                <li><a href="equipment.html"><i class="fas fa-network-wired"></i> Equipment</a></li>
+                <li><a href="equipment-assignment.html" class="active"><i class="fas fa-link"></i> Assign Equipment</a></li>
+                <li><a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="username">Loading...</span>
+                        <button id="logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <button class="mobile-nav-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Equipment Assignment</h1>
+                    <p class="date">Today: <span id="currentDate"></span></p>
+                </div>
+                <div class="header-right">
+                    <button class="btn-primary" id="newAssignmentBtn">
+                        <i class="fas fa-plus"></i> New Assignment
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Equipment Assignments</h2>
+                    <div class="assignment-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="assignmentSearch" class="styled-search" placeholder="Search assignments...">
+                        </div>
+                        <button id="exportAssignmentsBtn" class="export-btn">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </button>
+                    </div>
+                </div>
+                <div id="assignmentsList" class="assignments-list">
+                    <!-- Assignments will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Assignment Modal -->
+    <div id="assignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-link"></i> Assign Equipment</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="assignmentForm">
+                <div class="assignment-type">
+                    <input type="radio" id="clientType" name="assignmentType" value="client" checked>
+                    <label for="clientType">Client</label>
+                    <input type="radio" id="barrackType" name="assignmentType" value="barrack">
+                    <label for="barrackType">Barrack</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="equipmentSelect">
+                        <i class="fas fa-network-wired"></i> Equipment
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-server"></i>
+                        </span>
+                        <select id="equipmentSelect" name="equipmentId" required>
+                            <option value="">Select Equipment</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="assigneeName">
+                        <i class="fas fa-user"></i> <span id="assigneeLabel">Client Name</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
+                        <input type="text" id="assigneeName" name="assigneeName" required 
+                               placeholder="Enter name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="stationName">
+                        <i class="fas fa-map-marker-alt"></i> Station Name *
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-building"></i>
+                        </span>
+                        <select id="stationName" name="stationName" required>
+                            <option value="">Select station...</option>
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="macAddress">
+                        <i class="fas fa-fingerprint"></i> MAC Address
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-network-wired"></i>
+                        </span>
+                        <input type="text" id="macAddress" name="macAddress" readonly placeholder="MAC will appear here">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('assignmentModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Assignment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <button class="mobile-fab" id="mobileNewAssignmentBtn" aria-label="Add new assignment">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <script src="js/equipment-assignment.js"></script>
+    <script src="mobile-nav.js"></script>
+    <script>
+        // Add event listener for assignment type toggle
+        document.querySelectorAll('input[name="assignmentType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const assigneeLabel = document.getElementById('assigneeLabel');
+                const assigneeInput = document.getElementById('assigneeName');
+                if (e.target.value === 'client') {
+                    assigneeLabel.textContent = 'Client Name';
+                    assigneeInput.placeholder = 'Enter client name';
+                } else {
+                    assigneeLabel.textContent = 'Barrack Name';
+                    assigneeInput.placeholder = 'Enter barrack name';
+                }
+            });
+        });
+
+        // Add event listener for new assignment button
+        document.getElementById('newAssignmentBtn').addEventListener('click', () => {
+            showModal('assignmentModal');
+        });
+        // Add event listener for mobile FAB
+        document.getElementById('mobileNewAssignmentBtn').addEventListener('click', () => {
+            showModal('assignmentModal');
+        });
+
+        // Fetch stations and populate the stationName dropdown in the form
+        async function populateStationDropdown() {
+            try {
+                const res = await fetch('/api/stations');
+                if (!res.ok) throw new Error('Failed to fetch stations');
+                const stations = await res.json();
+                const select = document.getElementById('stationName');
+                if (select) {
+                    select.innerHTML = '<option value="">Select station...</option>';
+                    stations.forEach(station => {
+                        const option = document.createElement('option');
+                        option.value = station.name;
+                        option.textContent = station.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (err) {
+                console.error('Error loading stations:', err);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', populateStationDropdown);
+
+        // Populate MAC address when equipment is selected
+        document.getElementById('equipmentSelect').addEventListener('change', async function() {
+            const equipmentId = this.value;
+            const macInput = document.getElementById('macAddress');
+            if (!equipmentId) {
+                macInput.value = '';
+                return;
+            }
+            try {
+                const res = await fetch(`/api/equipment/${equipmentId}`);
+                if (!res.ok) throw new Error('Failed to fetch equipment');
+                const equipment = await res.json();
+                macInput.value = equipment.macAddress || '';
+            } catch (err) {
+                macInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html> 

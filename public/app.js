@@ -12,7 +12,10 @@ function getDOMElements() {
         navLinks: document.querySelectorAll('.nav-links a'),
         newTicketBtn: document.getElementById('newTicketBtn'),
         newExpenseBtn: document.getElementById('newExpenseBtn'),
-        closeButtons: document.querySelectorAll('.close-modal')
+        closeButtons: document.querySelectorAll('.close-modal'),
+        equipmentModal: document.getElementById('equipmentModal'),
+        equipmentForm: document.getElementById('equipmentForm'),
+        newEquipmentBtn: document.getElementById('newEquipmentBtn')
     };
 }
 
@@ -121,6 +124,18 @@ function setupEventListeners(elements) {
             closeModal(e.target.id);
         }
     });
+
+    // Equipment Form
+    const equipmentForm = document.getElementById('equipmentForm');
+    if (equipmentForm) {
+        equipmentForm.addEventListener('submit', handleEquipmentSubmit);
+    }
+
+    // New Equipment Button
+    const newEquipmentBtn = document.getElementById('newEquipmentBtn');
+    if (newEquipmentBtn) {
+        newEquipmentBtn.addEventListener('click', () => showModal('equipmentModal'));
+    }
 }
 
 // Navigation
@@ -1240,4 +1255,50 @@ function initResponsiveTables() {
 }
 
 // Initialize responsive tables when DOM is loaded
-document.addEventListener('DOMContentLoaded', initResponsiveTables); 
+document.addEventListener('DOMContentLoaded', initResponsiveTables);
+
+// Equipment Form Handler
+async function handleEquipmentSubmit(e) {
+    e.preventDefault();
+    
+    const formData = {
+        equipmentName: document.getElementById('equipmentName').value,
+        modelName: document.getElementById('equipmentModel').value,
+        macAddress: document.getElementById('equipmentMacAddress').value
+    };
+
+    // Validate required fields
+    if (!formData.equipmentName || !formData.modelName || !formData.macAddress) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/equipment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to add equipment');
+        }
+
+        showNotification('Equipment added successfully', 'success');
+        closeModal('equipmentModal');
+        
+        // Reset form
+        document.getElementById('equipmentForm').reset();
+        
+        // Refresh equipment list if it exists
+        if (typeof loadEquipment === 'function') {
+            loadEquipment();
+        }
+    } catch (error) {
+        console.error('Error adding equipment:', error);
+        showNotification(error.message || 'Error adding equipment', 'error');
+    }
+} 

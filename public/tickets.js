@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         }
-
+        
         // Load initial data
         await loadTickets();
         
@@ -221,22 +221,22 @@ function initializeCharts() {
                 categoryChart.destroy();
             }
             
-            categoryChart = new Chart(categoryCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Installation', 'LOS', 'Other'],
-                    datasets: [{
-                        data: [0, 0, 0],
+    categoryChart = new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Installation', 'LOS', 'Other'],
+            datasets: [{
+                data: [0, 0, 0],
                         backgroundColor: ['#3498db', '#e74c3c', '#2ecc71'],
                         borderWidth: 1,
                         borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
                             display: true,
                             position: 'bottom',
                             labels: {
@@ -245,10 +245,10 @@ function initializeCharts() {
                                     size: 12
                                 }
                             }
-                        }
-                    }
                 }
-            });
+            }
+        }
+    });
             console.log('Category chart initialized successfully');
         } catch (error) {
             console.error('Error initializing category chart:', error);
@@ -265,21 +265,21 @@ function initializeCharts() {
                 monthlyChart.destroy();
             }
             
-            monthlyChart = new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: 'Tickets',
-                        data: Array(12).fill(0),
+    monthlyChart = new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Tickets',
+                data: Array(12).fill(0),
                         backgroundColor: '#3498db',
                         borderColor: '#2980b9',
                         borderWidth: 1,
                         borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
+            }]
+        },
+        options: {
+            responsive: true,
                     maintainAspectRatio: false,
                     scales: {
                         y: {
@@ -329,19 +329,19 @@ function initializeCharts() {
                 stationChart.destroy();
             }
             
-            stationChart = new Chart(stationCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['NYS GILGI', 'NYS NAIVASHA', 'MARRIEDQUARTERS', '5KRMAIN CAMP'],
-                    datasets: [{
-                        data: Array(4).fill(0),
+    stationChart = new Chart(stationCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['NYS GILGI', 'NYS NAIVASHA', 'MARRIEDQUARTERS', '5KRMAIN CAMP'],
+            datasets: [{
+                data: Array(4).fill(0),
                         backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f'],
                         borderWidth: 1,
                         borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
+            }]
+        },
+        options: {
+            responsive: true,
                     maintainAspectRatio: false,
                     cutout: '60%',
                     plugins: {
@@ -520,18 +520,18 @@ function updateCharts() {
     if (monthlyChart) {
         console.log('Updating monthly chart...');
         try {
-            const monthlyData = Array(12).fill(0);
+    const monthlyData = Array(12).fill(0);
             const currentYear = new Date().getFullYear();
             
-            filteredTickets.forEach(ticket => {
-                const date = new Date(ticket.reportedDateTime);
+    filteredTickets.forEach(ticket => {
+        const date = new Date(ticket.reportedDateTime);
                 if (date.getFullYear() === currentYear) {
-                    monthlyData[date.getMonth()]++;
+        monthlyData[date.getMonth()]++;
                 }
-            });
+    });
 
-            monthlyChart.data.datasets[0].data = monthlyData;
-            monthlyChart.update();
+    monthlyChart.data.datasets[0].data = monthlyData;
+    monthlyChart.update();
             console.log('Monthly data:', monthlyData);
         } catch (error) {
             console.error('Error updating monthly chart:', error);
@@ -577,19 +577,19 @@ async function displayTickets() {
         });
 
         // Apply pagination
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
         const pageTickets = sortedTickets.slice(startIndex, endIndex);
 
         // Show/hide no tickets message
         if (filteredTickets.length === 0) {
-            elements.ticketsList.innerHTML = '';
-            elements.noTickets.style.display = 'block';
+        elements.ticketsList.innerHTML = '';
+        elements.noTickets.style.display = 'block';
             updatePagination(); // Still update pagination even with no tickets
-            return;
-        }
+        return;
+    }
 
-        elements.noTickets.style.display = 'none';
+    elements.noTickets.style.display = 'none';
 
         // Get user role
         const response = await fetch('/api/auth/check', { credentials: 'include' });
@@ -599,62 +599,62 @@ async function displayTickets() {
         const isStaff = userRole === 'staff';
 
         // Render tickets
-        elements.ticketsList.innerHTML = pageTickets.map(ticket => `
-            <div class="ticket-card">
-                <div class="ticket-header">
-                    <span class="ticket-id">#${ticket._id.slice(-6)}</span>
-                    <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
-                </div>
-                <div class="ticket-body">
-                    <div class="ticket-client">
-                        <div class="client-name">${ticket.clientName}</div>
-                        <div class="client-details">
-                            <div class="client-detail-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:${ticket.clientNumber}" class="phone-link">
-                                    <span>${ticket.clientNumber}</span>
-                                </a>
-                            </div>
-                            <div class="client-detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
+    elements.ticketsList.innerHTML = pageTickets.map(ticket => `
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <span class="ticket-id">#${ticket._id.slice(-6)}</span>
+                <span class="ticket-status ${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+            </div>
+            <div class="ticket-body">
+                <div class="ticket-client">
+                    <div class="client-name">${ticket.clientName}</div>
+                    <div class="client-details">
+                        <div class="client-detail-item">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:${ticket.clientNumber}" class="phone-link">
+                                <span>${ticket.clientNumber}</span>
+                            </a>
+                        </div>
+                        <div class="client-detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
                                 ${ticket.stationLocation}
-                            </div>
-                            <div class="client-detail-item">
-                                <i class="fas fa-home"></i>
+                        </div>
+                        <div class="client-detail-item">
+                            <i class="fas fa-home"></i>
                                 ${ticket.houseNumber}
-                            </div>
                         </div>
                     </div>
+                </div>
                     <span class="ticket-category ${ticket.category.toLowerCase().replace(/\s+/g, '-')}">${ticket.category}</span>
-                    <div class="ticket-description">
+                <div class="ticket-description">
                         <strong>Problem:</strong>
                         ${ticket.problemDescription}
-                    </div>
-                    ${ticket.problemCorrected ? `
-                    <div class="ticket-solution">
+                </div>
+                ${ticket.problemCorrected ? `
+                <div class="ticket-solution">
                         <strong>Solution:</strong>
                         ${ticket.problemCorrected}
-                    </div>
-                    ` : ''}
                 </div>
-                <div class="ticket-footer">
+                ` : ''}
+            </div>
+            <div class="ticket-footer">
                     <span class="ticket-date">
                         <i class="far fa-clock"></i>
                         ${formatDate(ticket.reportedDateTime)}
                     </span>
-                    <div class="ticket-actions">
+                <div class="ticket-actions">
                         <button class="ticket-action-btn edit" onclick="openEditModal('${ticket._id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
                         ${(!isJuniorStaff && !isStaff) ? `
-                        <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
+                    <button class="ticket-action-btn delete" onclick="deleteTicket('${ticket._id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
                         ` : ''}
-                    </div>
                 </div>
             </div>
-        `).join('');
+        </div>
+    `).join('');
 
         // Update pagination after displaying tickets
         updatePagination();

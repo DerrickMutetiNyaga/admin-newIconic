@@ -70,11 +70,11 @@ async function checkAndSendFollowUps() {
             const followUpMessage = `REMINDER: Ticket #${ticket._id.toString().slice(-6)} has been open for ${hoursOpen} hours without updates.\n\nClient: ${ticket.clientName} (${ticket.clientNumber})\nLocation: ${ticket.stationLocation}, House: ${ticket.houseNumber}\nCategory: ${ticket.category}\nProblem: ${ticket.problemDescription}\n\nPlease update the ticket status as soon as possible.`;
 
             console.log(`\nProcessing follow-up for ticket #${ticket._id.toString().slice(-6)}`);
-            
+
             // Send follow-up to all support numbers
             for (const supportNumber of supportNumbers) {
                 try {
-                    await sendSMS(followUpMessage, supportNumber);
+                await sendSMS(followUpMessage, supportNumber);
                     console.log(`✓ Successfully sent reminder to ${supportNumber}`);
                 } catch (error) {
                     console.error(`✗ Failed to send reminder to ${supportNumber}:`, error);
