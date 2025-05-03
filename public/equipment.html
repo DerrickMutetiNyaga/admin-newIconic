@@ -7,407 +7,655 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            background: #f6f8fa;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: #223046;
+        /* Modern Color Scheme and Base Styles */
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
         }
+
+        body {
+            background: var(--background);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Layout */
         .container {
             display: flex;
             min-height: 100vh;
         }
+
+        /* Sidebar Styles */
         .sidebar {
-            width: 250px;
+            width: 280px;
             background: linear-gradient(145deg, #1a472a, #2d8659);
-            color: #fff;
-            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding-bottom: 20px;
+            transition: width 0.3s ease;
         }
+
         .sidebar .logo {
-            padding: 32px 24px 18px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .sidebar .logo h2 {
-            font-size: 28px;
+            font-size: 1.75rem;
+            font-weight: 700;
             margin: 0;
-            letter-spacing: 1px;
-            color: #fff;
+            letter-spacing: 0.5px;
         }
+
         .sidebar .logo p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.85);
-            margin-top: 8px;
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
         }
+
         .sidebar .nav-links {
             list-style: none;
-            padding: 0 0 0 0;
+            padding: 1rem 0;
             margin: 0;
         }
-        .sidebar .nav-links li {
-            margin: 0;
-        }
+
         .sidebar .nav-links a {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: rgba(255,255,255,0.95);
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
-            padding: 14px 28px;
-            font-size: 1.08em;
-            border-left: 4px solid transparent;
-            transition: background 0.2s, border 0.2s;
+            padding: 0.875rem 1.5rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
         }
-        .sidebar .nav-links a.active, .sidebar .nav-links a:hover {
-            background: rgba(255,255,255,0.08);
-            border-left: 4px solid #fff;
+
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+            color: white;
         }
-        .sidebar .user-profile {
-            margin: 24px 18px 0 18px;
-            background: rgba(0,0,0,0.10);
-            border-radius: 12px;
-            padding: 18px 16px 12px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+
+        .sidebar .nav-links i {
+            width: 1.25rem;
+            text-align: center;
         }
-        .sidebar .user-avatar {
-            font-size: 2.2em;
-            margin-bottom: 8px;
-        }
-        .sidebar .user-details {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .sidebar .logout-btn {
-            background: rgba(0,0,0,0.18);
-            color: #fff;
-            border-radius: 6px;
-            padding: 7px 16px;
-            margin-top: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.2s;
-        }
-        .sidebar .logout-btn:hover {
-            background: rgba(0,0,0,0.28);
-        }
-        @media (max-width: 900px) {
-            .sidebar { width: 70px; }
-            .sidebar .logo h2, .sidebar .logo p, .sidebar .user-details span, .sidebar .logout-btn { display: none; }
-            .sidebar .logo { padding: 24px 0 12px 0; }
-            .sidebar .nav-links a { padding: 14px 10px; justify-content: center; }
-            .sidebar .user-profile { padding: 10px 0 8px 0; align-items: center; }
-        }
-        main.main-content {
+
+        /* Main Content */
+        .main-content {
             flex: 1;
             padding: 0;
             min-width: 0;
+            background: var(--background);
         }
+
+        /* Header */
         header {
-            background: #fff;
-            border-radius: 0 0 18px 18px;
-            box-shadow: 0 2px 8px rgba(52,152,219,0.06);
-            padding: 32px 36px 18px 36px;
+            background: var(--surface);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
+            gap: 1rem;
         }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
         .header-left h1 {
-            font-size: 2.1em;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #223046;
-        }
-        .header-left .date {
-            color: #888;
-            font-size: 1em;
+            font-size: 1.5rem;
+            font-weight: 600;
             margin: 0;
+            color: var(--text);
         }
+
         .header-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 1rem;
         }
-        .btn-primary {
-            background: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 7px;
-            padding: 12px 28px;
-            font-size: 1.08em;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(52,152,219,0.08);
-            transition: background 0.2s;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary:hover { background: #2980b9; }
-        @media (max-width: 900px) {
-            header { padding: 18px 10px 10px 10px; }
-            .header-left h1 { font-size: 1.3em; }
-        }
-        .dashboard-stats {
+
+        /* Stats Grid */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin: 0 36px 24px 36px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
         }
+
         .stat-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(52,152,219,0.06);
-            padding: 22px 18px 18px 18px;
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.7em;
-            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
-            color: #3498db;
+            font-size: 1.25rem;
+            background: var(--primary);
+            color: white;
         }
+
         .stat-info h3 {
-            margin: 0 0 4px 0;
-            font-size: 1.08em;
-            color: #223046;
-            font-weight: 600;
-        }
-        .stat-info p {
             margin: 0;
-            font-size: 1.18em;
-            font-weight: 700;
-            color: #1976d2;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            font-weight: 500;
         }
-        @media (max-width: 900px) {
-            .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 10px 18px 10px; }
+
+        .stat-info p {
+            margin: 0.25rem 0 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
         }
-        @media (max-width: 600px) {
-            .dashboard-stats { grid-template-columns: 1fr; margin: 0 4px 12px 4px; }
-            .stat-card { padding: 14px 8px 10px 8px; }
+
+        /* Equipment Section */
+        .equipment-section {
+            padding: 0 2rem 2rem;
         }
-        .filters-section {
+
+        .equipment-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 18px;
-            margin-bottom: 18px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(52,152,219,0.06);
-            padding: 18px 24px;
-            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
         }
-        .filters-section > * { min-width: 180px; }
-        .filters-section label { font-size: 0.98em; color: #223046; margin-bottom: 4px; font-weight: 500; }
-        .styled-select, .styled-search {
+
+        .equipment-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .equipment-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 240px;
+        }
+
+        .search-box input {
             width: 100%;
-            height: 42px;
-            border-radius: 7px;
-            border: 1px solid #e0e0e0;
-            background: #f8f9fa;
-            padding: 0 14px;
-            color: #223046;
-            font-size: 1.08em;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
         }
-        .styled-search { padding-left: 44px !important; }
-        .search-box { position: relative; display: flex; align-items: center; }
-        .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #b0b8c1; font-size: 1.1em; }
-        .export-btn { min-width: 170px; }
-        @media (max-width: 900px) {
-            .filters-section { flex-direction: column; align-items: stretch; gap: 14px; padding: 12px 8px; }
-            .filters-section > * { max-width: 100%; margin: 0; }
-            .filters-section button { width: 100%; justify-content: center; }
+
+        .search-box i {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
         }
-        .equipment-list {
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Equipment Grid */
+        .equipment-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
         }
-        @media (max-width: 900px) {
-            .equipment-list { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 600px) {
-            .equipment-list { grid-template-columns: 1fr; padding: 10px; }
-        }
+
         .equipment-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            min-width: 0;
-            max-width: 100%;
+            gap: 1rem;
         }
+
         .equipment-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52,152,219,0.15);
-            border-color: #3498db;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
         }
+
         .equipment-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
         }
+
         .equipment-title h3 {
             margin: 0;
-            font-size: 1.2em;
-            color: #2c3e50;
+            font-size: 1.25rem;
             font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.3px;
         }
+
         .equipment-model {
-            display: inline-block;
-            font-size: 0.9em;
-            color: #1976d2;
-            margin-top: 5px;
-            background: #e3f2fd;
-            padding: 2px 8px;
-            border-radius: 4px;
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
         }
+
         .equipment-actions {
             display: flex;
-            gap: 8px;
+            gap: 0.5rem;
         }
+
         .btn-icon {
-            background: none;
+            padding: 0.5rem;
             border: none;
-            padding: 8px;
+            border-radius: 0.5rem;
+            background: transparent;
+            color: var(--text-light);
             cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-            color: #666;
-        }
-        .btn-icon:hover {
-            background: #f8f9fa;
-        }
-        .btn-icon.edit:hover {
-            color: #3498db;
-            background: #e3f2fd;
-        }
-        .btn-icon.delete:hover {
-            color: #e74c3c;
-            background: #fde8e8;
-        }
-        .equipment-body {
-            padding: 20px;
-            background: #fff;
-        }
-        .equipment-info {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #f8f9fa;
-            transition: background 0.2s;
-        }
-        .info-item:hover {
-            background: #e3f2fd;
-        }
-        .info-item i {
-            width: 32px;
-            height: 32px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #e3f2fd;
-            border-radius: 8px;
-            color: #1976d2;
-            font-size: 1.1em;
+            width: 2rem;
+            height: 2rem;
         }
+
+        .btn-icon:hover {
+            background: var(--background);
+            color: var(--primary);
+        }
+
+        .btn-icon.delete:hover {
+            color: var(--danger);
+            background: #fee2e2;
+        }
+
+        .equipment-body {
+            flex: 1;
+        }
+
+        .equipment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 0.75rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .info-item:hover {
+            background: #f1f5f9;
+        }
+
+        .info-item i {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
         .info-content {
             display: flex;
             flex-direction: column;
+            gap: 0.25rem;
         }
+
         .info-label {
-            font-size: 0.8em;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .info-value {
-            font-size: 0.95em;
-            color: #2c3e50;
+            font-size: 0.8rem;
+            color: var(--text-light);
             font-weight: 500;
         }
-        .equipment-footer {
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #eee;
+
+        .info-value {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 500;
         }
+
+        .equipment-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
         .equipment-status {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
             font-weight: 500;
+            background: var(--background);
+        }
+
+        .equipment-status i {
+            font-size: 1rem;
+        }
+
+        /* Status Colors */
+        .equipment-status[data-status="In Stock"] {
             background: #e8f5e9;
             color: #2e7d32;
-            box-shadow: 0 2px 4px rgba(46, 125, 50, 0.1);
         }
-        .equipment-status i {
-            font-size: 0.8em;
-            color: #2e7d32;
+
+        .equipment-status[data-status="Assigned"] {
+            background: #e3f2fd;
+            color: #1976d2;
         }
+
+        .equipment-status[data-status="Under Maintenance"] {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        /* No Data State */
         .no-data {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 40px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 2px dashed #e0e0e0;
+            padding: 3rem 2rem;
+            background: var(--surface);
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 2px dashed var(--border);
         }
+
         .no-data i {
-            font-size: 3em;
-            color: #3498db;
-            margin-bottom: 15px;
-            background: #e3f2fd;
-            width: 80px;
-            height: 80px;
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            background: var(--background);
+            width: 5rem;
+            height: 5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            margin: 0 auto 20px;
+            margin: 0 auto 1.5rem;
         }
+
         .no-data p {
-            font-size: 1.2em;
-            color: #2c3e50;
-            margin: 10px 0;
+            font-size: 1.25rem;
+            color: var(--text);
+            margin: 0.5rem 0;
             font-weight: 500;
         }
+
         .no-data span {
-            color: #666;
-            font-size: 0.9em;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .equipment-grid {
+                grid-template-columns: 1fr;
+                padding: 0.5rem;
+            }
+
+            .equipment-card {
+                padding: 1rem;
+            }
+
+            .equipment-title h3 {
+                font-size: 1.1rem;
+            }
+
+            .info-item {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 4rem;
+            }
+
+            .sidebar .logo h2,
+            .sidebar .logo p,
+            .sidebar .nav-links span {
+                display: none;
+            }
+
+            .sidebar .nav-links a {
+                padding: 1rem;
+                justify-content: center;
+            }
+
+            .sidebar .nav-links i {
+                font-size: 1.25rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .equipment-section {
+                padding: 1rem;
+            }
+
+            .equipment-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .equipment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn-secondary {
+            background: var(--background);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Mobile FAB */
+        .mobile-fab {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .mobile-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-fab {
+                display: flex;
+            }
         }
     </style>
 </head>
@@ -423,13 +671,12 @@
                 <p>Administration Management</p>
             </div>
             <ul class="nav-links">
-                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
-                <li><a href="expenses.html"><i class="fas fa-receipt"></i> Expenses</a></li>
-                <li id="approvalsLink" style="display: none;"><a href="approvals.html"><i class="fas fa-users-cog"></i> User Management</a></li>
-                <li><a href="equipment.html" class="active"><i class="fas fa-network-wired"></i> Equipment</a></li>
-                <li><a href="equipment-assignment.html"><i class="fas fa-link"></i> Assign Equipment</a></li>
-                <li><a href="stations.html"><i class="fas fa-map-marker-alt"></i> Stations</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> <span>Tickets</span></a></li>
+                <li><a href="expenses.html"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+                <li><a href="equipment.html" class="active"><i class="fas fa-network-wired"></i> <span>Equipment</span></a></li>
+                <li><a href="equipment-assignment.html"><i class="fas fa-link"></i> <span>Assign Equipment</span></a></li>
+                <li class="station-link" style="display:none;"><a href="stations.html"><i class="fas fa-map-marker-alt"></i> <span>Station</span></a></li>
             </ul>
             <div class="user-profile">
                 <div class="user-info">
@@ -451,18 +698,17 @@
                     <button class="mobile-nav-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1>Equipment Inventory</h1>
-                    <p class="date">Today: <span id="currentDate"></span></p>
+                    <h1>Equipment Management</h1>
                 </div>
                 <div class="header-right">
                     <button class="btn-primary" id="newEquipmentBtn">
-                        <i class="fas fa-plus"></i> Add New Equipment
+                        <i class="fas fa-plus"></i> Add Equipment
                     </button>
                 </div>
             </header>
-            <div class="dashboard-stats">
+            <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon ticket">
+                    <div class="stat-icon">
                         <i class="fas fa-network-wired"></i>
                     </div>
                     <div class="stat-info">
@@ -471,58 +717,48 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon open">
+                    <div class="stat-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>Active Equipment</h3>
+                        <h3>Assigned Equipment</h3>
                         <p id="activeEquipment">0</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon progress">
-                        <i class="fas fa-exclamation-circle"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-tools"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>Maintenance Required</h3>
+                        <h3>Under Maintenance</h3>
                         <p id="maintenanceRequired">0</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon resolved">
+                    <div class="stat-icon">
                         <i class="fas fa-box"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>Free Equipment</h3>
+                        <h3>In Stock</h3>
                         <p id="remainingEquipment">0</p>
                     </div>
                 </div>
             </div>
-            <div class="content-section">
-                <div class="section-header">
+            <div class="equipment-section">
+                <div class="equipment-header">
                     <h2>Equipment List</h2>
+                    <div class="equipment-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="equipmentSearch" placeholder="Search equipment...">
                         </div>
-                <div class="filters-section">
-                    <div style="display: flex; flex-direction: column; flex: 1; min-width: 200px; max-width: 240px;">
-                        <label for="equipmentNameFilter" style="font-size: 0.98em; color: #223046; margin-bottom: 4px; font-weight: 500;">Equipment Name</label>
-                        <select id="equipmentNameFilter" class="styled-select" style="width: 100%; height: 42px; border-radius: 7px; border: 1px solid #e0e0e0; background: #f8f9fa; padding: 0 14px; color: #223046; font-size: 1.08em; flex-shrink: 0;">
-                            <option value="">All Equipment</option>
-                        </select>
+                        <button class="btn-primary" id="exportBtn">
+                            <i class="fas fa-file-excel"></i> Export
+                        </button>
                     </div>
-                    <div class="search-box" style="position: relative; flex: 1 1 0; max-width: 500px; min-width: 180px; margin: 0 18px 0 0; display: flex; align-items: center;">
-                        <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #b0b8c1; font-size: 1.1em;"></i>
-                        <input type="text" id="equipmentSearch" class="styled-search" placeholder="Search equipment..." style="width: 100%; padding: 13px 16px 13px 44px; border-radius: 7px; border: 1px solid #e0e0e0; background: #f8f9fa; font-size: 1.08em;">
-                    </div>
-                    <div class="search-box" style="position: relative; flex: 1 1 0; max-width: 500px; min-width: 180px; margin: 0 18px 0 0; display: flex; align-items: center;">
-                        <i class="fas fa-map-marker-alt" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #b0b8c1; font-size: 1.1em;"></i>
-                        <input type="text" id="stationSearch" class="styled-search" placeholder="Search by Station Name..." style="width: 100%; padding: 13px 16px 13px 44px; border-radius: 7px; border: 1px solid #e0e0e0; background: #f8f9fa; font-size: 1.08em;">
-                    </div>
-                    <button id="exportEquipmentBtn" class="btn-primary export-btn" style="height: 42px; display: flex; align-items: center; gap: 8px; background: #3498db; color: #fff; border: none; border-radius: 7px; padding: 0 24px; font-size: 1.08em; font-weight: 500; box-shadow: 0 2px 8px rgba(52,152,219,0.08); transition: background 0.2s; flex-shrink: 0; min-width: 170px;">
-                        <i class="fas fa-file-excel" style="font-size: 1.1em;"></i> Export to Excel
-                    </button>
                 </div>
-                <div id="equipmentList" class="equipment-list">
-                    <!-- Equipment items will be loaded here -->
+                <div class="equipment-grid" id="equipmentList">
+                    <!-- Equipment cards will be dynamically inserted here -->
                 </div>
             </div>
         </main>
@@ -531,86 +767,90 @@
     <div id="equipmentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-network-wired"></i> Add New Equipment</h2>
+                <h2 id="modalTitle">Add New Equipment</h2>
                 <button class="close-modal">&times;</button>
             </div>
             <form id="equipmentForm">
-                <div class="form-group">
-                    <label for="equipmentName">
-                        <i class="fas fa-tag"></i> Equipment Name
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-server"></i>
-                        </span>
-                        <input type="text" id="equipmentName" name="equipmentName" required 
-                               placeholder="Enter equipment name">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="equipmentName">Equipment Name</label>
+                        <input type="text" id="equipmentName" name="equipmentName" class="form-control" 
+                               placeholder="Enter equipment name" required>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="equipmentModel">
-                        <i class="fas fa-microchip"></i> Model Name
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-cube"></i>
-                        </span>
-                        <input type="text" id="equipmentModel" name="modelName" required 
-                               placeholder="Enter model name">
+                    <div class="form-group">
+                        <label for="modelName">Model Name</label>
+                        <input type="text" id="modelName" name="modelName" class="form-control" 
+                               placeholder="Enter model name" required>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="equipmentMacAddress">
-                        <i class="fas fa-fingerprint"></i> MAC Address
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-network-wired"></i>
-                        </span>
-                        <input type="text" id="equipmentMacAddress" name="macAddress" required 
-                               pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
-                               placeholder="00:00:00:00:00:00">
+                    <div class="form-group">
+                        <label for="macAddress">MAC Address</label>
+                        <input type="text" id="macAddress" name="macAddress" class="form-control" 
+                               placeholder="00:00:00:00:00:00" pattern="^[0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}$" required>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="purchaseDate">
-                        <i class="fas fa-calendar"></i> Purchase Date
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-calendar-alt"></i>
-                        </span>
-                        <input type="date" id="purchaseDate" name="purchaseDate" 
-                               placeholder="Select purchase date">
+                    <div class="form-group">
+                        <label for="purchaseDate">Purchase Date</label>
+                        <input type="date" id="purchaseDate" name="purchaseDate" class="form-control" 
+                               placeholder="mm/dd/yyyy">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="equipmentStatus">
-                        <i class="fas fa-info-circle"></i> Status
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-tasks"></i>
-                        </span>
-                        <select id="equipmentStatus" name="status" required>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-control" required>
+                            <option value="">Select Status</option>
                             <option value="In Stock">In Stock</option>
                             <option value="Assigned">Assigned</option>
                             <option value="Under Maintenance">Under Maintenance</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('equipmentModal')">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-save"></i> Save Equipment
-                    </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary close-modal">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Equipment</button>
                 </div>
             </form>
         </div>
     </div>
+    <!-- Mobile FAB -->
+    <button class="mobile-fab" id="mobileNewEquipmentBtn" aria-label="Add new equipment">
+        <i class="fas fa-plus"></i>
+    </button>
     <script src="js/equipment.js"></script>
     <script src="mobile-nav.js"></script>
+    <script>
+        // Function to update equipment stats
+        async function updateEquipmentStats() {
+            try {
+                // Fetch all equipment
+                const equipmentRes = await fetch('/api/equipment', { credentials: 'include' });
+                if (!equipmentRes.ok) throw new Error('Failed to fetch equipment');
+                const equipment = await equipmentRes.json();
+
+                // Calculate stats
+                const totalEquipment = equipment.length;
+                const assignedEquipment = equipment.filter(e => e.status === 'Assigned').length;
+                const maintenanceEquipment = equipment.filter(e => e.status === 'Under Maintenance').length;
+                const inStockEquipment = equipment.filter(e => e.status === 'In Stock').length;
+
+                // Update the stats display
+                document.getElementById('totalEquipment').textContent = totalEquipment;
+                document.getElementById('activeEquipment').textContent = assignedEquipment;
+                document.getElementById('maintenanceRequired').textContent = maintenanceEquipment;
+                document.getElementById('remainingEquipment').textContent = inStockEquipment;
+            } catch (error) {
+                console.error('Error updating equipment stats:', error);
+                // Show error in stats
+                document.getElementById('totalEquipment').textContent = '-';
+                document.getElementById('activeEquipment').textContent = '-';
+                document.getElementById('maintenanceRequired').textContent = '-';
+                document.getElementById('remainingEquipment').textContent = '-';
+            }
+        }
+
+        // Call updateEquipmentStats when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateEquipmentStats();
+            // Update stats every 30 seconds
+            setInterval(updateEquipmentStats, 30000);
+        });
+    </script>
 </body>
 </html> 

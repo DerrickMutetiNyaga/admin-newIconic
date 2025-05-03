@@ -8,6 +8,7 @@ const exportBtn = document.getElementById('exportAssignmentsBtn');
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded, setting up event listeners for assignment modal.');
     checkAuth();
     loadUnassignedEquipment();
     loadAssignments();
@@ -32,6 +33,15 @@ async function checkAuth() {
             let displayName = data.username;
             if (data.role) displayName += ` (${data.role.charAt(0).toUpperCase() + data.role.slice(1)})`;
             usernameElement.textContent = displayName;
+        }
+        // Show/hide station link based on role
+        const stationLink = document.querySelector('.station-link');
+        if (stationLink) {
+            if (data.role === 'admin' || data.role === 'superadmin') {
+                stationLink.style.display = 'block';
+            } else {
+                stationLink.style.display = 'none';
+            }
         }
     } catch (error) {
         console.error('Auth check failed:', error);
@@ -68,59 +78,143 @@ function populateEquipmentSelect(equipment) {
 async function loadAssignments() {
     try {
         const response = await fetch('/api/equipment-assignments/assignments');
-        if (!response.ok) throw new Error('Failed to load assignments');
+        if (!response.ok) {
+            if (response.status === 503) {
+                throw new Error('Database connection error. Please try again later.');
+            }
+            throw new Error('Failed to load assignments');
+        }
         
         const assignments = await response.json();
         displayAssignments(assignments);
     } catch (error) {
         console.error('Error loading assignments:', error);
-        showNotification('Error loading assignments', 'error');
+        const assignmentsList = document.getElementById('assignmentsList');
+        if (assignmentsList) {
+            assignmentsList.innerHTML = `
+                <div class="no-data error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Unable to Load Assignments</p>
+                    <span>${error.message || 'Please try again later'}</span>
+                    <button class="btn-primary" onclick="loadAssignments()">
+                        <i class="fas fa-sync-alt"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
+        showNotification(error.message || 'Error loading assignments', 'error');
     }
 }
 
-// Display assignments
+// Display assignments in the grid
 function displayAssignments(assignments) {
+    const assignmentsList = document.getElementById('assignmentsList');
+    if (!assignmentsList) return;
+
     if (!assignments || assignments.length === 0) {
         assignmentsList.innerHTML = `
             <div class="no-data">
                 <i class="fas fa-link"></i>
-                <p>No assignments found</p>
-                <span>Create a new assignment to get started</span>
+                <p>No Assignments Found</p>
+                <span>Add new assignments to get started</span>
             </div>
         `;
         return;
     }
 
-    assignmentsList.innerHTML = assignments.map(assignment => `
+    assignmentsList.innerHTML = assignments.map(assignment => {
+        // Handle both populated and unpopulated equipment references
+        const equipment = assignment.equipment || assignment.equipmentId || {};
+        const equipmentName = equipment.name || equipment.equipmentName || 'Unknown Equipment';
+        const macAddress = equipment.macAddress || 'N/A';
+        
+        // Format the createdAt date
+        const assignedDate = assignment.createdAt 
+            ? new Date(assignment.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : 'N/A';
+
+        return `
         <div class="assignment-card">
             <div class="assignment-header">
-                <h3>${assignment.equipment.equipmentName}</h3>
-                <span class="mac-address">${assignment.equipment.macAddress}</span>
-            </div>
-            <div class="assignment-details">
-                <div class="detail-item">
-                    <i class="fas fa-user"></i>
-                    <span>${assignment.assigneeName}</span>
+                <div class="assignment-title">
+                    <h3>${equipmentName}</h3>
+                    <span class="assignment-type">${assignment.assignmentType === 'client' ? 'Client Assignment' : 'Barrack Assignment'}</span>
                 </div>
-                <div class="detail-item">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>${assignment.stationName}</span>
-                </div>
-                <div class="detail-item">
-                    <i class="fas fa-tag"></i>
-                    <span>${assignment.assignmentType}</span>
+                <div class="assignment-actions">
+                    <button class="btn-icon edit" onclick="editAssignment('${assignment._id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon delete" onclick="deleteAssignment('${assignment._id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
-            <div class="assignment-actions">
-                <button class="btn-icon edit" onclick="editAssignment('${assignment._id}')" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-icon delete" onclick="deleteAssignment('${assignment._id}')" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <div class="assignment-body">
+                <div class="assignment-info">
+                    <div class="info-item">
+                        <i class="fas fa-user"></i>
+                        <div class="info-content">
+                            <span class="info-label">${assignment.assignmentType === 'client' ? 'Client Name' : 'Barrack Name'}</span>
+                            <span class="info-value">${assignment.assigneeName || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-building"></i>
+                        <div class="info-content">
+                            <span class="info-label">Station</span>
+                            <span class="info-value">${assignment.stationName || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-network-wired"></i>
+                        <div class="info-content">
+                            <span class="info-label">MAC Address</span>
+                            <span class="info-value">${macAddress}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-calendar"></i>
+                        <div class="info-content">
+                            <span class="info-label">Assigned Date</span>
+                            <span class="info-value">${assignedDate}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
+
+    // Update stats
+    updateStats(assignments);
+}
+
+// Update stats
+function updateStats(assignments) {
+    if (!assignments) return;
+    
+    const stats = {
+        total: assignments.length || 0,
+        client: assignments.filter(a => a.assignmentType === 'client').length || 0,
+        barrack: assignments.filter(a => a.assignmentType === 'barrack').length || 0,
+        active: assignments.filter(a => a.status === 'active').length || 0
+    };
+
+    // Update each stat if the element exists
+    const totalElement = document.getElementById('totalAssignments');
+    const clientElement = document.getElementById('clientAssignments');
+    const barrackElement = document.getElementById('barrackAssignments');
+    const activeElement = document.getElementById('activeAssignments');
+
+    if (totalElement) totalElement.textContent = stats.total;
+    if (clientElement) clientElement.textContent = stats.client;
+    if (barrackElement) barrackElement.textContent = stats.barrack;
+    if (activeElement) activeElement.textContent = stats.active;
 }
 
 // Handle form submission
@@ -303,17 +397,112 @@ function setupEventListeners() {
         });
     }
 
+    // Export functionality
+    const exportBtn = document.getElementById('exportBtn');
     if (exportBtn) {
-        exportBtn.addEventListener('click', function() {
-            const search = document.getElementById('assignmentSearch')?.value || '';
-            const station = document.getElementById('stationFilter')?.value || '';
-            let url = '/api/equipment-assignments/export?';
-            if (search) url += `search=${encodeURIComponent(search)}&`;
-            if (station) url += `station=${encodeURIComponent(station)}&`;
-            url = url.replace(/&$/, '');
-            window.open(url, '_blank');
+        exportBtn.addEventListener('click', async function() {
+            try {
+                const search = document.getElementById('assignmentSearch')?.value || '';
+                const station = document.getElementById('stationFilter')?.value || '';
+                
+                // Show loading state
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+                
+                // Build export URL
+                let url = '/api/equipment-assignments/export';
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                if (station) params.append('station', station);
+                if (params.toString()) url += '?' + params.toString();
+
+                // Fetch the export
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to export assignments');
+                }
+
+                // Get the blob from the response
+                const blob = await response.blob();
+                
+                // Create download link
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `equipment-assignments-${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(downloadUrl);
+
+                showNotification('Export completed successfully', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification(error.message || 'Failed to export assignments', 'error');
+            } finally {
+                // Reset button state
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> Export';
+            }
         });
     }
+
+    // New Assignment button
+    const newAssignmentBtn = document.getElementById('newAssignmentBtn');
+    if (newAssignmentBtn) {
+        newAssignmentBtn.addEventListener('click', () => {
+            showModal('assignmentModal');
+        });
+    }
+    // Mobile FAB
+    const mobileNewAssignmentBtn = document.getElementById('mobileNewAssignmentBtn');
+    if (mobileNewAssignmentBtn) {
+        mobileNewAssignmentBtn.addEventListener('click', () => {
+            showModal('assignmentModal');
+        });
+    }
+
+    // Close modal buttons (Cancel and X)
+    const closeButtons = document.querySelectorAll('.close-modal, .btn-secondary');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+
+    // Close modal when clicking outside the modal content
+    document.addEventListener('click', function(e) {
+        // Close modal on Cancel or X
+        if (e.target.classList.contains('close-modal') || e.target.classList.contains('btn-secondary')) {
+            let modal = e.target.closest('.modal');
+            if (!modal) {
+                // If the button is inside modal-content, walk up to parent .modal
+                let parent = e.target.parentElement;
+                while (parent && !parent.classList.contains('modal')) {
+                    parent = parent.parentElement;
+                }
+                modal = parent;
+            }
+            if (modal) {
+                closeModal(modal.id);
+            }
+        }
+        // Close modal when clicking outside modal-content
+        if (e.target.classList.contains('modal')) {
+            closeModal(e.target.id);
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => closeModal(modal.id));
+        }
+    });
 }
 
 // Utility functions
@@ -342,11 +531,37 @@ function debounce(func, wait) {
 }
 
 // Modal functions
+async function populateStationDropdown() {
+    const stationSelect = document.getElementById('stationName');
+    if (!stationSelect) return;
+    stationSelect.innerHTML = '<option value="">Select station...</option>';
+    try {
+        const response = await fetch('/api/stations', { credentials: 'include' });
+        if (!response.ok) throw new Error('Failed to fetch stations');
+        const stations = await response.json();
+        stations.forEach(station => {
+            const option = document.createElement('option');
+            option.value = station.name; // or station._id if you use IDs
+            option.textContent = station.name;
+            stationSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error fetching stations:', error);
+        // Optionally show a notification
+    }
+}
+
 function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        console.log('Modal shown:', modalId);
+        if (modalId === 'assignmentModal') {
+            populateStationDropdown();
+        }
+    } else {
+        console.error('Modal not found:', modalId);
     }
 }
 

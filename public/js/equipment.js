@@ -16,6 +16,9 @@ const elements = {
 // Initialize the page
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // Show loading overlay
+        if (elements.authLoading) elements.authLoading.style.display = 'flex';
+        
         // Check authentication
         const response = await fetch('/api/auth/check', {
             credentials: 'include'
@@ -45,6 +48,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (approvalsLink) approvalsLink.style.display = 'none';
         }
 
+        // Show/hide station link based on role
+        const stationLink = document.querySelector('.station-link');
+        if (stationLink) {
+            if (data.role === 'admin' || data.role === 'superadmin') {
+                stationLink.style.display = 'block';
+            } else {
+                stationLink.style.display = 'none';
+            }
+        }
+
         // Add logout handler
         if (elements.logoutBtn) {
             elements.logoutBtn.addEventListener('click', async () => {
@@ -68,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Hide loading overlay and show content
         if (elements.authLoading) elements.authLoading.style.display = 'none';
-        if (elements.mainContent) elements.mainContent.classList.add('authenticated');
+        if (elements.mainContent) elements.mainContent.style.display = 'block';
 
         // Populate equipment name filter
         await populateEquipmentNameFilter();
@@ -83,13 +96,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Initialize page functionality
 function initializePage() {
-    // Set up event listeners
+    console.log('Initializing page...'); // Debug log
     setupEventListeners();
-    
-    // Load initial data
     loadEquipment();
-    
-    // Update current date
     updateCurrentDate();
 }
 
@@ -107,34 +116,16 @@ function setupEventListeners() {
         elements.equipmentForm.addEventListener('submit', handleEquipmentSubmit);
     }
 
-    // Search and filter
-    if (elements.equipmentSearch) {
-        elements.equipmentSearch.addEventListener('input', debounce(() => {
-            loadEquipment();
-        }, 300));
-    }
-
-    if (elements.equipmentNameFilter) {
-        elements.equipmentNameFilter.addEventListener('change', () => {
-            loadEquipment();
+    // Close modal buttons
+    const closeButtons = document.querySelectorAll('.close-modal, .btn-secondary');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                closeModal(modal.id);
+            }
         });
-    }
-
-    // Export to Excel
-    const exportBtn = document.getElementById('exportEquipmentBtn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', function() {
-            const equipmentName = document.getElementById('equipmentNameFilter')?.value || '';
-            const search = document.getElementById('equipmentSearch')?.value || '';
-            const station = document.getElementById('stationSearch')?.value || '';
-            let url = '/api/equipment/export?';
-            if (equipmentName) url += `equipmentName=${encodeURIComponent(equipmentName)}&`;
-            if (search) url += `search=${encodeURIComponent(search)}&`;
-            if (station) url += `station=${encodeURIComponent(station)}&`;
-            url = url.replace(/&$/, '');
-            window.open(url, '_blank');
-        });
-    }
+    });
 
     // Close modal when clicking outside
     document.addEventListener('click', (e) => {
@@ -150,6 +141,81 @@ function setupEventListeners() {
             modals.forEach(modal => closeModal(modal.id));
         }
     });
+
+    // Search and filter
+    if (elements.equipmentSearch) {
+        elements.equipmentSearch.addEventListener('input', debounce(() => {
+            loadEquipment();
+        }, 300));
+    }
+
+    if (elements.equipmentNameFilter) {
+        elements.equipmentNameFilter.addEventListener('change', () => {
+            loadEquipment();
+        });
+    }
+
+    // Export to Excel and Export functionality (merged)
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async function() {
+            try {
+                const search = elements.equipmentSearch?.value || '';
+                const status = document.getElementById('statusFilter')?.value || '';
+                
+                // Show loading state
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+                
+                // Build export URL
+                let url = '/api/equipment/export';
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                if (status) params.append('status', status);
+                if (params.toString()) url += '?' + params.toString();
+
+                // Fetch the export
+                const response = await fetch(url, { credentials: 'include' });
+                if (!response.ok) {
+                    throw new Error('Failed to export equipment');
+                }
+
+                // Get the blob from the response
+                const blob = await response.blob();
+                
+                // Create download link
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `equipment-${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(downloadUrl);
+
+                showNotification('Export completed successfully', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification(error.message || 'Failed to export equipment', 'error');
+            } finally {
+                // Reset button state
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> Export';
+            }
+        });
+    }
+
+    // Search functionality for card filtering
+    if (elements.equipmentSearch) {
+        elements.equipmentSearch.addEventListener('input', debounce(() => {
+            const searchTerm = elements.equipmentSearch.value.toLowerCase();
+            const equipment = document.querySelectorAll('.equipment-card');
+            equipment.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        }, 300));
+    }
 }
 
 // Update current date
@@ -202,6 +268,21 @@ function closeModal(modalId) {
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+        
+        // Reset form if it's the equipment modal
+        if (modalId === 'equipmentModal') {
+            const form = document.getElementById('equipmentForm');
+            if (form) {
+                form.reset();
+                delete form.dataset.equipmentId;
+                
+                // Reset modal title and button
+                const modalTitle = document.querySelector('#equipmentModal h2');
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (modalTitle) modalTitle.textContent = 'Add New Equipment';
+                if (submitButton) submitButton.textContent = 'Save Equipment';
+            }
+        }
     }
 }
 
@@ -252,16 +333,6 @@ async function handleEquipmentSubmit(e) {
         showNotification(equipmentId ? 'Equipment updated successfully' : 'Equipment added successfully', 'success');
         closeModal('equipmentModal');
         
-        // Reset form and clear equipment ID
-        form.reset();
-        delete form.dataset.equipmentId;
-        
-        // Reset modal title and button
-        const modalTitle = document.querySelector('#equipmentModal h2');
-        const submitButton = form.querySelector('button[type="submit"]');
-        if (modalTitle) modalTitle.textContent = 'Add New Equipment';
-        if (submitButton) submitButton.textContent = 'Save Equipment';
-        
         loadEquipment();
     } catch (error) {
         console.error('Error saving equipment:', error);
@@ -286,96 +357,142 @@ async function loadEquipment() {
             url += `?${params.toString()}`;
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            credentials: 'include'
+        });
+        
         if (!response.ok) {
             throw new Error('Failed to load equipment');
         }
 
         const data = await response.json();
+        console.log('Loaded equipment data:', data);
         displayEquipment(data);
         updateStats(data);
     } catch (error) {
         console.error('Error loading equipment:', error);
         showNotification('Error loading equipment', 'error');
+        
+        // Show error state in the equipment list
+        const equipmentList = document.getElementById('equipmentList');
+        if (equipmentList) {
+            equipmentList.innerHTML = `
+                <div class="no-data error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Unable to Load Equipment</p>
+                    <span>${error.message || 'Please try again later'}</span>
+                    <button class="btn-primary" onclick="loadEquipment()">
+                        <i class="fas fa-sync-alt"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
-// Display equipment list
+// Display equipment in the grid
 function displayEquipment(equipment) {
-    if (!elements.equipmentList) return;
+    const equipmentList = document.getElementById('equipmentList');
+    if (!equipmentList) {
+        console.error('Equipment list element not found');
+        return;
+    }
 
     if (!equipment || equipment.length === 0) {
-        elements.equipmentList.innerHTML = `
+        equipmentList.innerHTML = `
             <div class="no-data">
                 <i class="fas fa-network-wired"></i>
-                <p>No equipment found</p>
+                <p>No Equipment Found</p>
                 <span>Add new equipment to get started</span>
             </div>
         `;
         return;
     }
 
-    elements.equipmentList.innerHTML = equipment.map(item => {
-        const statusColors = {
-            'In Stock': { bg: '#e8f5e9', color: '#2e7d32', icon: 'box' },
-            'Assigned': { bg: '#e3f2fd', color: '#1976d2', icon: 'user-check' },
-            'Under Maintenance': { bg: '#fff3e0', color: '#f57c00', icon: 'tools' }
-        };
-        const status = statusColors[item.status] || statusColors['In Stock'];
-        
-        return `
-            <div class="equipment-card">
+    console.log('Displaying equipment:', equipment); // Debug log
+
+    equipmentList.innerHTML = equipment.map(item => `
+        <div class="equipment-card">
             <div class="equipment-header">
-                    <div class="equipment-title">
-                        <h3>${item.equipmentName}</h3>
-                        <span class="equipment-model">${item.modelName}</span>
+                <div class="equipment-title">
+                    <h3>${item.equipmentName || 'Unnamed Equipment'}</h3>
+                    ${item.modelName ? `<span class="equipment-model">${item.modelName}</span>` : ''}
+                </div>
+                <div class="equipment-actions">
+                    <button class="btn-icon edit" onclick="editEquipment('${item._id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon delete" onclick="deleteEquipment('${item._id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
-            <div class="equipment-actions">
-                <button class="btn-icon edit" onclick="editEquipment('${item._id}')" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-icon delete" onclick="deleteEquipment('${item._id}')" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-                <div class="equipment-body">
-                    <div class="equipment-info">
+            <div class="equipment-body">
+                <div class="equipment-info">
+                    ${item.macAddress ? `
                         <div class="info-item">
-                            <i class="fas fa-fingerprint"></i>
+                            <i class="fas fa-network-wired"></i>
                             <div class="info-content">
                                 <span class="info-label">MAC Address</span>
                                 <span class="info-value">${item.macAddress}</span>
                             </div>
                         </div>
+                    ` : ''}
+                    ${item.serialNumber ? `
                         <div class="info-item">
-                            <i class="fas fa-calendar-alt"></i>
+                            <i class="fas fa-barcode"></i>
+                            <div class="info-content">
+                                <span class="info-label">Serial Number</span>
+                                <span class="info-value">${item.serialNumber}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${item.description ? `
+                        <div class="info-item">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="info-content">
+                                <span class="info-label">Description</span>
+                                <span class="info-value">${item.description}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${item.purchaseDate ? `
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
                             <div class="info-content">
                                 <span class="info-label">Purchase Date</span>
-                                <span class="info-value">${item.purchaseDate ? new Date(item.purchaseDate).toLocaleDateString() : 'Not specified'}</span>
+                                <span class="info-value">${new Date(item.purchaseDate).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <div class="info-item">
-                            <i class="fas fa-calendar-check"></i>
-                            <div class="info-content">
-                                <span class="info-label">Added On</span>
-                                <span class="info-value">${new Date(item.createdAt).toLocaleDateString()}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="equipment-footer">
-                    <span class="equipment-status" style="background: ${status.bg}; color: ${status.color}">
-                        <i class="fas fa-${status.icon}"></i> ${item.status}
-                    </span>
+                    ` : ''}
                 </div>
             </div>
-        `;
-    }).join('');
+            <div class="equipment-footer">
+                <div class="equipment-status" data-status="${item.status || 'In Stock'}">
+                    <i class="fas ${getStatusIcon(item.status)}"></i>
+                    ${item.status || 'In Stock'}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Helper function to get status icon
+function getStatusIcon(status) {
+    switch (status) {
+        case 'Assigned':
+            return 'fa-check-circle';
+        case 'Under Maintenance':
+            return 'fa-tools';
+        default:
+            return 'fa-box';
+    }
 }
 
 // Update stats
 function updateStats(data) {
+    if (!data) return;
+    
     const stats = {
         total: data.length || 0,
         active: data.filter(item => item.status === 'Assigned').length || 0,
@@ -383,10 +500,18 @@ function updateStats(data) {
         remaining: data.filter(item => item.status === 'In Stock').length || 0
     };
 
-    document.getElementById('totalEquipment').textContent = stats.total;
-    document.getElementById('activeEquipment').textContent = stats.active;
-    document.getElementById('maintenanceRequired').textContent = stats.maintenance;
-    document.getElementById('remainingEquipment').textContent = stats.remaining;
+    const elements = {
+        totalEquipment: document.getElementById('totalEquipment'),
+        activeEquipment: document.getElementById('activeEquipment'),
+        maintenanceRequired: document.getElementById('maintenanceRequired'),
+        remainingEquipment: document.getElementById('remainingEquipment')
+    };
+
+    // Update each stat if the element exists
+    if (elements.totalEquipment) elements.totalEquipment.textContent = stats.total;
+    if (elements.activeEquipment) elements.activeEquipment.textContent = stats.active;
+    if (elements.maintenanceRequired) elements.maintenanceRequired.textContent = stats.maintenance;
+    if (elements.remainingEquipment) elements.remainingEquipment.textContent = stats.remaining;
 }
 
 // Edit equipment

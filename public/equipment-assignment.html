@@ -7,526 +7,621 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Custom sidebar styles */
+        /* Modern Color Scheme and Base Styles */
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            background: var(--background);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
         .sidebar {
+            width: 280px;
             background: linear-gradient(145deg, #1a472a, #2d8659);
             color: white;
-            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar .logo {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .logo h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .sidebar .nav-links {
+            list-style: none;
+            padding: 1rem 0;
+            margin: 0;
         }
         
         .sidebar .nav-links a {
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
         }
         
         .sidebar .nav-links a:hover,
         .sidebar .nav-links a.active {
             background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .sidebar .logo {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding-bottom: 15px;
-        }
-        
-        .sidebar .logo h2 {
+            border-left-color: white;
             color: white;
-            font-size: 26px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            letter-spacing: 1px;
-        }
-        
-        .sidebar .logo p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
-            margin-top: 8px;
-        }
-        
-        .sidebar .user-profile {
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 10px;
-            margin: 15px 0;
-            padding: 15px;
-        }
-        
-        .sidebar .logout-btn {
-            background: rgba(0, 0, 0, 0.2);
-            color: white;
-            border-radius: 6px;
-            padding: 8px 15px;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar .logout-btn:hover {
-            background: rgba(0, 0, 0, 0.3);
-            transform: translateY(-2px);
         }
 
         .sidebar .nav-links i {
-            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+            width: 1.25rem;
+            text-align: center;
         }
 
-        /* Reuse existing styles from equipment.html */
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 0;
+            min-width: 0;
+            background: var(--background);
+        }
+
+        /* Header */
+        header {
+            background: var(--surface);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: var(--primary);
+            color: white;
+        }
+
+        .stat-info h3 {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .stat-info p {
+            margin: 0.25rem 0 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Assignment Section */
+        .assignment-section {
+            padding: 0 2rem 2rem;
+        }
+
+        .assignment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .assignment-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .assignment-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 240px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Assignment Grid */
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .assignment-card {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .assignment-title h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.3px;
+        }
+
+        .assignment-type {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: transparent;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .btn-icon:hover {
+            background: var(--background);
+            color: var(--primary);
+        }
+
+        .btn-icon.delete:hover {
+            color: var(--danger);
+            background: #fee2e2;
+        }
+
+        .assignment-body {
+            flex: 1;
+        }
+
+        .assignment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 0.75rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .info-item:hover {
+            background: #f1f5f9;
+        }
+
+        .info-item i {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Modal Styles */
         .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-content {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            background: var(--surface);
+            border-radius: 1rem;
             width: 90%;
-            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .modal-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
 
         .modal-header h2 {
             margin: 0;
-            font-size: 1.2em;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .modal-header h2 i {
-            color: #666;
+            font-size: 1.25rem;
+            font-weight: 600;
         }
 
         .close-modal {
             background: none;
             border: none;
-            color: #666;
-            font-size: 1.2em;
+            font-size: 1.5rem;
+            color: var(--text-light);
             cursor: pointer;
-            padding: 5px;
+            padding: 0.5rem;
         }
 
-        /* Form Styles */
-        #assignmentForm {
-            padding: 20px;
+        .modal-body {
+            padding: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-size: 0.9em;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
         }
 
-        .form-group label i {
-            color: #666;
-            margin-right: 5px;
-        }
-
-        .input-group {
-            position: relative;
-            display: flex;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .input-group:focus-within {
-            border-color: #666;
-        }
-
-        .input-group-text {
-            padding: 8px 12px;
-            color: #666;
-            background: #f8f9fa;
-            border-right: 1px solid #ddd;
-        }
-
-        .input-group input,
-        .input-group select {
-            flex: 1;
-            padding: 8px 12px;
-            border: none;
-            background: white;
-            font-size: 0.95em;
-            color: #333;
+        .form-control {
             width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
         }
 
-        .input-group input:focus,
-        .input-group select:focus {
+        .form-control:focus {
             outline: none;
+            border-color: var(--primary);
         }
 
-        .input-group input::placeholder {
-            color: #999;
-        }
-
-        /* Assignment Type Toggle */
-        .assignment-type {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .assignment-type label {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .assignment-type input[type="radio"] {
-            display: none;
-        }
-
-        .assignment-type input[type="radio"]:checked + label {
-            background: #333;
-            color: white;
-            border-color: #333;
-        }
-
-        /* Form Actions */
-        .form-actions {
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            gap: 1rem;
         }
 
-        .btn-primary,
         .btn-secondary {
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 0.95em;
+            background: var(--background);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #333;
-            border: 1px solid #ddd;
+            transition: background-color 0.2s ease;
         }
 
         .btn-secondary:hover {
-            background: #eee;
+            background: var(--border);
         }
 
-        /* Required Field Indicator */
-        .form-group label::after {
-            content: '*';
-            color: #666;
-            margin-left: 4px;
+        /* Assignment Type Toggle */
+        .assignment-type-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* Error States */
-        .input-group.error {
-            border-color: #dc3545;
+        .assignment-type-toggle label {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
-        .error-message {
-            color: #dc3545;
-            font-size: 0.85em;
-            margin-top: 4px;
+        .assignment-type-toggle input[type="radio"] {
+            display: none;
         }
 
-        /* Responsive Design */
+        .assignment-type-toggle input[type="radio"]:checked + label {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .modal-content {
-                width: 95%;
-                margin: 10px auto;
+            .sidebar {
+                width: 4rem;
             }
 
-            #assignmentForm {
-                padding: 15px;
+            .sidebar .logo h2,
+            .sidebar .logo p,
+            .sidebar .nav-links span {
+                display: none;
             }
 
-            .form-actions {
+            .sidebar .nav-links a {
+                padding: 1rem;
+                justify-content: center;
+            }
+
+            .sidebar .nav-links i {
+                font-size: 1.25rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .assignment-section {
+                padding: 1rem;
+            }
+
+            .assignment-controls {
                 flex-direction: column;
+                width: 100%;
             }
 
-            .btn-primary,
-            .btn-secondary {
+            .search-box {
+                width: 100%;
+            }
+
+            .btn-primary {
                 width: 100%;
                 justify-content: center;
             }
-        }
 
-        /* Assignment Card Grid Layout */
-        .assignments-list {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 20px;
-        }
-        @media (max-width: 900px) {
-            .assignments-list {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (max-width: 600px) {
-            .assignments-list {
+            .assignments-grid {
                 grid-template-columns: 1fr;
-                padding: 10px;
             }
-        }
-        .assignment-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            max-width: 100%;
-        }
-        .assignment-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52,152,219,0.15);
-            border-color: #3498db;
-        }
-        .assignment-header {
-            padding: 18px 20px 10px 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        }
-        .assignment-header h3 {
-            margin: 0;
-            font-size: 1.1em;
-            color: #2c3e50;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .assignment-header .mac-address {
-            font-size: 0.92em;
-            color: #1976d2;
-            background: #e3f2fd;
-            padding: 2px 8px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 2px;
-        }
-        .assignment-details {
-            padding: 18px 20px 10px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.98em;
-            color: #223046;
-            background: #f8f9fa;
-            border-radius: 7px;
-            padding: 8px 12px;
-        }
-        .detail-item i {
-            color: #3498db;
-            font-size: 1.1em;
-            background: #e3f2fd;
-            border-radius: 6px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .assignment-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            padding: 10px 20px 15px 20px;
-            border-top: 1px solid #eee;
-            background: #f8f9fa;
-        }
-        .btn-icon {
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-            color: #666;
-        }
-        .btn-icon:hover {
-            background: #e3f2fd;
-            color: #3498db;
-        }
-        .btn-icon.delete:hover {
-            color: #e74c3c;
-            background: #fde8e8;
-        }
-        .no-data {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 2px dashed #e0e0e0;
-        }
-        .no-data i {
-            font-size: 3em;
-            color: #3498db;
-            margin-bottom: 15px;
-            background: #e3f2fd;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-        }
-        .no-data p {
-            font-size: 1.2em;
-            color: #2c3e50;
-            margin: 10px 0;
-            font-weight: 500;
-        }
-        .no-data span {
-            color: #666;
-            font-size: 0.9em;
         }
 
-        /* Improved mobile assignment controls */
-        .assignment-controls {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(52,152,219,0.06);
-            padding: 18px 24px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-        @media (max-width: 768px) {
-            .section-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0;
-            }
-            .section-header h2 {
-                margin-bottom: 10px;
-                text-align: left;
-                width: 100%;
-            }
-            .assignment-controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-                padding: 0;
-                box-shadow: none;
-                border-radius: 0;
-                background: transparent;
-                margin-bottom: 18px;
-            }
-            .assignment-controls .search-box,
-            .assignment-controls .export-btn {
-                width: 100%;
-                margin: 0;
-            }
-            .assignment-controls .search-box {
-                background: #fff;
-                border-radius: 8px;
-                padding: 10px 12px;
-                box-shadow: 0 1px 3px rgba(52,152,219,0.04);
-            }
-            .assignment-controls .export-btn {
-                border-radius: 8px;
-                box-shadow: 0 1px 3px rgba(52,152,219,0.04);
-                font-size: 1em;
-                padding: 12px 0;
-            }
-        }
-        .assignment-controls .search-box {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 1px 3px rgba(52,152,219,0.04);
-        }
-        .assignment-controls .styled-search {
-            border: none;
-            background: transparent;
-            flex: 1;
-            font-size: 1em;
-            outline: none;
-        }
-        .assignment-controls .export-btn {
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(52,152,219,0.04);
-            font-size: 1em;
-            padding: 10px 0;
-        }
-        /* Floating Action Button for mobile */
+        /* Mobile FAB */
         .mobile-fab {
             display: none;
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3.5rem;
+            height: 3.5rem;
             border-radius: 50%;
-            background: #3498db;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(52,152,219,0.18);
+            background: var(--primary);
+            color: white;
             border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            z-index: 9999;
+            z-index: 100;
             align-items: center;
             justify-content: center;
-            font-size: 2em;
-            transition: background 0.2s, box-shadow 0.2s;
+            font-size: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
         .mobile-fab:hover {
-            background: #2980b9;
-            box-shadow: 0 6px 16px rgba(52,152,219,0.28);
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
+
         @media (max-width: 768px) {
-            .mobile-fab { display: flex !important; }
+            .mobile-fab {
+                display: flex;
+            }
+        }
+
+        .no-data.error {
+            text-align: center;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .no-data.error i {
+            font-size: 2.5rem;
+            color: var(--danger);
+            margin-bottom: 1rem;
+        }
+
+        .no-data.error p {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0.5rem 0;
+        }
+
+        .no-data.error span {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .no-data.error .btn-primary {
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -543,13 +638,12 @@
                 <p>Administration Management</p>
             </div>
             <ul class="nav-links">
-                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
-                <li><a href="expenses.html"><i class="fas fa-receipt"></i> Expenses</a></li>
-                <li><a href="equipment.html"><i class="fas fa-network-wired"></i> Equipment</a></li>
-                <li><a href="equipment-assignment.html" class="active"><i class="fas fa-link"></i> Assign Equipment</a></li>
-                <li><a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
-                <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> <span>Tickets</span></a></li>
+                <li><a href="expenses.html"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+                <li><a href="equipment.html"><i class="fas fa-network-wired"></i> <span>Equipment</span></a></li>
+                <li><a href="equipment-assignment.html" class="active"><i class="fas fa-link"></i> <span>Assign Equipment</span></a></li>
+                <li class="station-link" style="display:none;"><a href="stations.html"><i class="fas fa-map-marker-alt"></i> <span>Station</span></a></li>
             </ul>
             <div class="user-profile">
                 <div class="user-info">
@@ -573,7 +667,6 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <h1>Equipment Assignment</h1>
-                    <p class="date">Today: <span id="currentDate"></span></p>
                 </div>
                 <div class="header-right">
                     <button class="btn-primary" id="newAssignmentBtn">
@@ -582,20 +675,59 @@
                 </div>
             </header>
 
-            <div class="content-section">
-                <div class="section-header">
-                    <h2>Equipment Assignments</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Assignments</h3>
+                        <p id="totalAssignments">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Client Assignments</h3>
+                        <p id="clientAssignments">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Barrack Assignments</h3>
+                        <p id="barrackAssignments">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Active Assignments</h3>
+                        <p id="activeAssignments">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="assignment-section">
+                <div class="assignment-header">
+                    <h2>Assignment List</h2>
                     <div class="assignment-controls">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="assignmentSearch" class="styled-search" placeholder="Search assignments...">
+                            <input type="text" id="assignmentSearch" placeholder="Search assignments...">
                         </div>
-                        <button id="exportAssignmentsBtn" class="export-btn">
-                            <i class="fas fa-file-excel"></i> Export to Excel
+                        <button class="btn-primary" id="exportBtn">
+                            <i class="fas fa-file-excel"></i> Export
                         </button>
                     </div>
                 </div>
-                <div id="assignmentsList" class="assignments-list">
+                <div class="assignments-grid" id="assignmentsList">
                     <!-- Assignments will be loaded here -->
                 </div>
             </div>
@@ -610,149 +742,53 @@
                 <button class="close-modal">&times;</button>
             </div>
             <form id="assignmentForm">
-                <div class="assignment-type">
-                    <input type="radio" id="clientType" name="assignmentType" value="client" checked>
-                    <label for="clientType">Client</label>
-                    <input type="radio" id="barrackType" name="assignmentType" value="barrack">
-                    <label for="barrackType">Barrack</label>
-                </div>
+                <div class="modal-body">
+                    <div class="assignment-type-toggle">
+                        <input type="radio" id="clientType" name="assignmentType" value="client" checked>
+                        <label for="clientType">Client</label>
+                        <input type="radio" id="barrackType" name="assignmentType" value="barrack">
+                        <label for="barrackType">Barrack</label>
+                    </div>
 
-                <div class="form-group">
-                    <label for="equipmentSelect">
-                        <i class="fas fa-network-wired"></i> Equipment
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-server"></i>
-                        </span>
-                        <select id="equipmentSelect" name="equipmentId" required>
+                    <div class="form-group">
+                        <label for="equipmentSelect">Equipment</label>
+                        <select id="equipmentSelect" name="equipmentId" class="form-control" required>
                             <option value="">Select Equipment</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="assigneeName">
-                        <i class="fas fa-user"></i> <span id="assigneeLabel">Client Name</span>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-user-circle"></i>
-                        </span>
-                        <input type="text" id="assigneeName" name="assigneeName" required 
-                               placeholder="Enter name">
+                    <div class="form-group">
+                        <label for="assigneeName" id="assigneeLabel">Client Name</label>
+                        <input type="text" id="assigneeName" name="assigneeName" class="form-control" 
+                               placeholder="Enter name" required>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="stationName">
-                        <i class="fas fa-map-marker-alt"></i> Station Name *
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-building"></i>
-                        </span>
-                        <select id="stationName" name="stationName" required>
+                    <div class="form-group">
+                        <label for="stationName">Station Name</label>
+                        <select id="stationName" name="stationName" class="form-control" required>
                             <option value="">Select station...</option>
-                            <!-- Options will be populated by JS -->
                         </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="macAddress">
-                        <i class="fas fa-fingerprint"></i> MAC Address
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-network-wired"></i>
-                        </span>
-                        <input type="text" id="macAddress" name="macAddress" readonly placeholder="MAC will appear here">
+                    <div class="form-group">
+                        <label for="macAddress">MAC Address</label>
+                        <input type="text" id="macAddress" name="macAddress" class="form-control" readonly>
                     </div>
                 </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('assignmentModal')">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-save"></i> Save Assignment
-                    </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary close-modal">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Assignment</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Mobile FAB -->
     <button class="mobile-fab" id="mobileNewAssignmentBtn" aria-label="Add new assignment">
         <i class="fas fa-plus"></i>
     </button>
 
     <script src="js/equipment-assignment.js"></script>
     <script src="mobile-nav.js"></script>
-    <script>
-        // Add event listener for assignment type toggle
-        document.querySelectorAll('input[name="assignmentType"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const assigneeLabel = document.getElementById('assigneeLabel');
-                const assigneeInput = document.getElementById('assigneeName');
-                if (e.target.value === 'client') {
-                    assigneeLabel.textContent = 'Client Name';
-                    assigneeInput.placeholder = 'Enter client name';
-                } else {
-                    assigneeLabel.textContent = 'Barrack Name';
-                    assigneeInput.placeholder = 'Enter barrack name';
-                }
-            });
-        });
-
-        // Add event listener for new assignment button
-        document.getElementById('newAssignmentBtn').addEventListener('click', () => {
-            showModal('assignmentModal');
-        });
-        // Add event listener for mobile FAB
-        document.getElementById('mobileNewAssignmentBtn').addEventListener('click', () => {
-            showModal('assignmentModal');
-        });
-
-        // Fetch stations and populate the stationName dropdown in the form
-        async function populateStationDropdown() {
-            try {
-                const res = await fetch('/api/stations');
-                if (!res.ok) throw new Error('Failed to fetch stations');
-                const stations = await res.json();
-                const select = document.getElementById('stationName');
-                if (select) {
-                    select.innerHTML = '<option value="">Select station...</option>';
-                    stations.forEach(station => {
-                        const option = document.createElement('option');
-                        option.value = station.name;
-                        option.textContent = station.name;
-                        select.appendChild(option);
-                    });
-                }
-            } catch (err) {
-                console.error('Error loading stations:', err);
-            }
-        }
-        window.addEventListener('DOMContentLoaded', populateStationDropdown);
-
-        // Populate MAC address when equipment is selected
-        document.getElementById('equipmentSelect').addEventListener('change', async function() {
-            const equipmentId = this.value;
-            const macInput = document.getElementById('macAddress');
-            if (!equipmentId) {
-                macInput.value = '';
-                return;
-            }
-            try {
-                const res = await fetch(`/api/equipment/${equipmentId}`);
-                if (!res.ok) throw new Error('Failed to fetch equipment');
-                const equipment = await res.json();
-                macInput.value = equipment.macAddress || '';
-            } catch (err) {
-                macInput.value = '';
-            }
-        });
-    </script>
 </body>
 </html> 
