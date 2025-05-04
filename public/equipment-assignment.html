@@ -510,22 +510,37 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                width: 4rem;
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+                width: 280px;
             }
 
             .sidebar .logo h2,
             .sidebar .logo p,
             .sidebar .nav-links span {
-                display: none;
+                display: block;
             }
 
             .sidebar .nav-links a {
-                padding: 1rem;
-                justify-content: center;
+                padding: 0.875rem 1.5rem;
+                justify-content: flex-start;
             }
 
             .sidebar .nav-links i {
                 font-size: 1.25rem;
+                width: 1.5rem;
+            }
+
+            .main-content {
+                margin-left: 0;
             }
 
             header {
@@ -558,6 +573,36 @@
             .assignments-grid {
                 grid-template-columns: 1fr;
             }
+
+            .mobile-nav-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: var(--text);
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+
+            .mobile-nav-toggle:hover {
+                color: var(--primary);
+            }
+        }
+
+        /* Add overlay when mobile nav is active */
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .mobile-nav-overlay.active {
+            display: block;
         }
 
         /* Mobile FAB */
@@ -631,6 +676,7 @@
         <div class="spinner"></div>
     </div>
 
+    <div class="mobile-nav-overlay"></div>
     <div class="container">
         <nav class="sidebar">
             <div class="logo">
@@ -789,6 +835,30 @@
     </button>
 
     <script src="js/equipment-assignment.js"></script>
-    <script src="mobile-nav.js"></script>
+    <script>
+        // Mobile Navigation Toggle
+        const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.mobile-nav-overlay');
+
+        function toggleMobileNav() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        mobileNavToggle.addEventListener('click', toggleMobileNav);
+        overlay.addEventListener('click', toggleMobileNav);
+
+        // Close mobile nav when clicking a link
+        const navLinks = document.querySelectorAll('.nav-links a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleMobileNav();
+                }
+            });
+        });
+    </script>
 </body>
 </html> 
