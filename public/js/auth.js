@@ -148,4 +148,34 @@ document.addEventListener('click', (event) => {
             })
             .catch(error => console.error('Error checking auth status:', error));
     }
-}); 
+});
+
+// Ensure logout button works on all pages
+function setupLogoutButton() {
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoutBtn = document.getElementById('logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    if (response.ok) {
+                        window.location.href = '/login.html';
+                    } else {
+                        throw new Error('Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    if (typeof showNotification === 'function') {
+                        showNotification('Logout failed. Please try again.', 'error');
+                    } else {
+                        alert('Logout failed. Please try again.');
+                    }
+                }
+            });
+        }
+    });
+}
+setupLogoutButton(); 
