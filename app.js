@@ -115,31 +115,79 @@ const enforceRoleAccess = (req, res, next) => {
             return res.redirect('/tickets.html');
         }
     } else if (userRole === 'staff') {
-        // Staff restrictions
+        // Staff restrictions - only allowed to access tickets, equipment, and equipment assignments
         const allowedPaths = [
             '/tickets.html',
             '/api/tickets',
+            '/equipment.html',
+            '/api/equipment',
+            '/equipment-assignment.html',
+            '/api/equipment-assignments',
             '/api/auth/logout',
             '/api/auth/check',
-            '/login.html'
+            '/login.html',
+            '/styles.css',  // Required for styling
+            '/js/',         // Required for JavaScript files
+            '/css/',        // Required for CSS files
+            '/fonts/',      // Required for fonts
+            '/cdnjs/',      // Required for CDN resources
+            '/cdn.jsdelivr.net/'  // Required for CDN resources
         ];
 
-        const isAllowedPath = allowedPaths.some(path => req.path.startsWith(path));
-        
-        if (req.method === 'POST' && req.path === '/api/tickets') {
-            return next();
-        }
+        // Check if the path is allowed
+        const isAllowedPath = allowedPaths.some(path => req.path.startsWith(path)) ||
+            req.path.includes('chart.js') ||
+            req.path.includes('flatpickr') ||
+            req.path.includes('cdn') ||
+            req.path.includes('fonts');
 
-        if (req.method === 'DELETE' && req.path.startsWith('/api/tickets')) {
-            return res.status(403).json({ error: 'Staff members cannot delete tickets' });
-        }
-
+        // Handle unauthorized access
         if (!isAllowedPath) {
+            // For API requests, return 403
             if (req.xhr || req.path.startsWith('/api/')) {
                 return res.status(403).json({ error: 'Access denied' });
             }
+            
+            // For page requests, log out and redirect to login
+            req.session.destroy((err) => {
+                if (err) {
+                    console.error('Error destroying session:', err);
+                }
+                return res.redirect('/login.html');
+            });
+            return;
+        }
+
+        // Handle API paths
+        if (req.path.startsWith('/api/')) {
+            // Prevent staff from deleting equipment
+            if (req.path.startsWith('/api/equipment') && req.method === 'DELETE') {
+                return res.status(403).json({ error: 'Staff members cannot delete equipment' });
+            }
+            
+            // Block all access to stations endpoint
+            if (req.path.startsWith('/api/stations')) {
+                return res.status(403).json({ error: 'Access denied' });
+            }
+            
+            // Handle equipment and assignment endpoints
+            if (req.path.startsWith('/api/equipment') || req.path.startsWith('/api/equipment-assignments')) {
+                return next();
+            }
+            
+            // For all other API paths
+            if (!isAllowedPath) {
+                return res.status(403).json({ error: 'Access denied' });
+            }
+            return next();
+        }
+
+        // For root path, redirect to tickets page
+        if (req.path === '/' || req.path === '/index.html') {
             return res.redirect('/tickets.html');
         }
+
+        return next();
     } else if (userRole === 'admin') {
         // Admin restrictions
         const allowedPaths = [

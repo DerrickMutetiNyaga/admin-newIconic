@@ -58,6 +58,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
+        // Hide delete buttons for staff users
+        if (data.role === 'staff') {
+            document.querySelectorAll('.btn-icon.delete').forEach(btn => {
+                btn.style.display = 'none';
+            });
+        }
+
         // Add logout handler
         if (elements.logoutBtn) {
             elements.logoutBtn.addEventListener('click', async () => {
@@ -472,6 +479,9 @@ function displayEquipment(equipment) {
 
     console.log('Displaying equipment:', equipment); // Debug log
 
+    // Get user role for conditional rendering
+    const userRole = document.getElementById('username')?.textContent?.match(/\((.*?)\)/)?.[1]?.toLowerCase();
+
     equipmentList.innerHTML = equipment.map(item => `
         <div class="equipment-card">
             <div class="equipment-header">
@@ -483,9 +493,11 @@ function displayEquipment(equipment) {
                     <button class="btn-icon edit" onclick="editEquipment('${item._id}')" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon delete" onclick="deleteEquipment('${item._id}')" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    ${userRole !== 'staff' ? `
+                        <button class="btn-icon delete" onclick="deleteEquipment('${item._id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
             <div class="equipment-body">

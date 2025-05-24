@@ -1280,6 +1280,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/auth.js"></script>
     <script src="mobile-nav.js"></script>
     <script src="tickets.js"></script>
     <script>
@@ -1293,22 +1294,11 @@
                 
                 // Update username with role indicator
                 const usernameElement = document.getElementById('username');
-                const approvalsLink = document.getElementById('approvalsLink');
-                const expensesLink = document.querySelector('a[href="expenses.html"]');
-                const dashboardLink = document.querySelector('a[href="index.html"]');
                 const newTicketBtn = document.getElementById('newTicketBtn');
                 const mobileNewTicketBtn = document.getElementById('mobileNewTicketBtn');
                 
                 if (data.role === 'juniorstaff') {
                     // Junior Staff restrictions
-                    if (expensesLink) {
-                        expensesLink.parentElement.style.display = 'none';
-                    }
-
-                    if (dashboardLink) {
-                        dashboardLink.parentElement.style.display = 'none';
-                    }
-
                     // Hide new ticket buttons (both desktop and mobile)
                     if (newTicketBtn) {
                         newTicketBtn.style.display = 'none';
@@ -1356,15 +1346,6 @@
                     document.head.appendChild(style);
 
                 } else if (data.role === 'staff') {
-                    // Staff restrictions
-                    if (expensesLink) {
-                        expensesLink.parentElement.style.display = 'none';
-                    }
-
-                    if (dashboardLink) {
-                        dashboardLink.parentElement.style.display = 'none';
-                    }
-
                     if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
                         usernameElement.textContent = `${data.username} (Staff)`;
                     }
@@ -1382,11 +1363,6 @@
                         usernameElement.textContent = `${data.username} (Superadmin)`;
                     }
                     
-                    // Show approvals link for superadmin
-                    if (approvalsLink) {
-                        approvalsLink.style.display = 'block';
-                    }
-
                     // Update logo text
                     const logoText = document.querySelector('.logo p');
                     if (logoText) {
@@ -1402,7 +1378,10 @@
         }
 
         // Call the function when the page loads
-        document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserRoleAndApplyRestrictions();
+            // The handleNavigationVisibility function from auth.js will be called by checkAuth()
+        });
 
         // Override the deleteTicket function to prevent staff and junior staff from deleting
         const originalDeleteTicket = window.deleteTicket;

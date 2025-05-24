@@ -43,6 +43,13 @@ async function checkAuth() {
                 stationLink.style.display = 'none';
             }
         }
+
+        // Hide delete buttons for staff users
+        if (data.role === 'staff') {
+            document.querySelectorAll('.btn-icon.delete').forEach(btn => {
+                btn.style.display = 'none';
+            });
+        }
     } catch (error) {
         console.error('Auth check failed:', error);
         window.location.href = '/login.html';
@@ -69,7 +76,11 @@ function populateEquipmentSelect(equipment) {
     equipment.forEach(item => {
         const option = document.createElement('option');
         option.value = item._id;
-        option.textContent = `${item.equipmentName} (${item.macAddress})`;
+        // Display both equipment name and model name if available
+        const displayText = item.modelName 
+            ? `${item.equipmentName} - ${item.modelName} (${item.macAddress})`
+            : `${item.equipmentName} (${item.macAddress})`;
+        option.textContent = displayText;
         equipmentSelect.appendChild(option);
     });
 }
@@ -109,18 +120,24 @@ async function loadAssignments() {
 // Display assignments in the grid
 function displayAssignments(assignments) {
     const assignmentsList = document.getElementById('assignmentsList');
-    if (!assignmentsList) return;
+    if (!assignmentsList) {
+        console.error('Assignments list element not found');
+        return;
+    }
 
     if (!assignments || assignments.length === 0) {
         assignmentsList.innerHTML = `
             <div class="no-data">
                 <i class="fas fa-link"></i>
                 <p>No Assignments Found</p>
-                <span>Add new assignments to get started</span>
+                <span>Assign equipment to get started</span>
             </div>
         `;
         return;
     }
+
+    // Get user role for conditional rendering
+    const userRole = document.getElementById('username')?.textContent?.match(/\((.*?)\)/)?.[1]?.toLowerCase();
 
     assignmentsList.innerHTML = assignments.map(assignment => {
         // Handle both populated and unpopulated equipment references
@@ -150,9 +167,11 @@ function displayAssignments(assignments) {
                     <button class="btn-icon edit" onclick="editAssignment('${assignment._id}')" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon delete" onclick="deleteAssignment('${assignment._id}')" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    ${userRole !== 'staff' ? `
+                        <button class="btn-icon delete" onclick="deleteAssignment('${assignment._id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
             <div class="assignment-body">
@@ -298,7 +317,11 @@ async function editAssignment(id) {
                     console.log('Fetched equipment:', equipment);
                     const option = document.createElement('option');
                     option.value = equipment._id;
-                    option.textContent = `${equipment.equipmentName} (${equipment.macAddress})`;
+                    // Display both equipment name and model name if available
+                    const displayText = equipment.modelName 
+                        ? `${equipment.equipmentName} - ${equipment.modelName} (${equipment.macAddress})`
+                        : `${equipment.equipmentName} (${equipment.macAddress})`;
+                    option.textContent = displayText;
                     equipmentSelect.appendChild(option);
                     equipmentSelect.value = equipment._id;
                     document.getElementById('macAddress').value = equipment.macAddress || '';
@@ -541,13 +564,13 @@ async function populateStationDropdown() {
         const stations = await response.json();
         stations.forEach(station => {
             const option = document.createElement('option');
-            option.value = station.name; // or station._id if you use IDs
-            option.textContent = station.name;
+            option.value = station.name;  // Set the value to station name
+            option.textContent = station.name;  // Set the display text
             stationSelect.appendChild(option);
         });
     } catch (error) {
         console.error('Error fetching stations:', error);
-        // Optionally show a notification
+        showNotification('Error loading stations', 'error');
     }
 }
 

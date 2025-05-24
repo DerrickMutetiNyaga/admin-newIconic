@@ -834,31 +834,93 @@
         <i class="fas fa-plus"></i>
     </button>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/auth.js"></script>
+    <script src="mobile-nav.js"></script>
     <script src="js/equipment-assignment.js"></script>
     <script>
-        // Mobile Navigation Toggle
-        const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.mobile-nav-overlay');
+        // Function to check user role and apply restrictions
+        async function checkUserRoleAndApplyRestrictions() {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                // Update username with role indicator
+                const usernameElement = document.getElementById('username');
+                const newAssignmentBtn = document.getElementById('newAssignmentBtn');
+                
+                if (data.role === 'juniorstaff') {
+                    // Junior Staff restrictions
+                    // Hide new assignment button
+                    if (newAssignmentBtn) {
+                        newAssignmentBtn.style.display = 'none';
+                    }
 
-        function toggleMobileNav() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+                    // Hide delete buttons for assignments
+                    document.querySelectorAll('.btn-icon.delete').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+
+                    if (usernameElement && !usernameElement.textContent.includes('(Junior Staff)')) {
+                        usernameElement.textContent = `${data.username} (Junior Staff)`;
+                    }
+
+                } else if (data.role === 'staff') {
+                    if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                        usernameElement.textContent = `${data.username} (Staff)`;
+                    }
+
+                    // Hide delete buttons for assignments
+                    document.querySelectorAll('.btn-icon.delete').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+                } else if (data.role === 'admin') {
+                    if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                        usernameElement.textContent = `${data.username} (Admin)`;
+                    }
+                } else if (data.role === 'superadmin') {
+                    if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                        usernameElement.textContent = `${data.username} (Superadmin)`;
+                    }
+                    
+                    // Update logo text
+                    const logoText = document.querySelector('.logo p');
+                    if (logoText) {
+                        logoText.textContent = 'Admin Portal';
+                    }
+                }
+
+                // Update the assignments display to reflect role-based permissions
+                loadAssignments();
+            } catch (error) {
+                console.error('Error checking user role:', error);
+            }
         }
 
-        mobileNavToggle.addEventListener('click', toggleMobileNav);
-        overlay.addEventListener('click', toggleMobileNav);
-
-        // Close mobile nav when clicking a link
-        const navLinks = document.querySelectorAll('.nav-links a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    toggleMobileNav();
-                }
-            });
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserRoleAndApplyRestrictions();
+            // The handleNavigationVisibility function from auth.js will be called by checkAuth()
         });
+
+        // Override the deleteAssignment function to prevent staff and junior staff from deleting
+        const originalDeleteAssignment = window.deleteAssignment;
+        window.deleteAssignment = async function(assignmentId) {
+            const response = await fetch('/api/auth/check');
+            const data = await response.json();
+            
+            if (data.role.toLowerCase() === 'staff' || data.role.toLowerCase() === 'juniorstaff') {
+                showNotification('You do not have permission to delete assignments.', 'error');
+                return;
+            }
+            
+            if (typeof originalDeleteAssignment === 'function') {
+                return originalDeleteAssignment(assignmentId);
+            }
+        };
     </script>
 </body>
 </html> 
