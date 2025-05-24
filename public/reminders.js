@@ -197,13 +197,29 @@ reminderSearch.addEventListener('input', () => {
     ));
 });
 
-// Check authentication on page load
+// Check authentication and role on page load
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const authData = await checkAuth();
         if (!authData) return;
 
-        // Initialize the page
+        // Check if user has required role (admin or superadmin)
+        if (!authData.role || (authData.role !== 'admin' && authData.role !== 'superadmin')) {
+            // Log out unauthorized user
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            // Redirect to login page
+            window.location.href = '/login.html';
+            return;
+        }
+
+        // Initialize the page only for authorized users
         loadReminders();
         
         // Show/hide repeat interval field
@@ -214,6 +230,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     } catch (error) {
         console.error('Initialization error:', error);
+        // If there's an error, redirect to login page
+        window.location.href = '/login.html';
     }
 });
 
