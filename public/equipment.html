@@ -483,27 +483,37 @@
                 bottom: 0;
                 z-index: 1000;
                 transition: left 0.3s ease;
+                background: linear-gradient(145deg, #1a472a, #2d8659);
+                width: 280px;
             }
 
             .sidebar.active {
                 left: 0;
-                width: 280px;
             }
 
             .sidebar .logo h2,
             .sidebar .logo p,
             .sidebar .nav-links span {
                 display: block;
+                color: white;
             }
 
             .sidebar .nav-links a {
                 padding: 0.875rem 1.5rem;
                 justify-content: flex-start;
+                color: rgba(255, 255, 255, 0.9);
+            }
+
+            .sidebar .nav-links a:hover,
+            .sidebar .nav-links a.active {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
             }
 
             .sidebar .nav-links i {
                 font-size: 1.25rem;
                 width: 1.5rem;
+                color: rgba(255, 255, 255, 0.9);
             }
 
             .main-content {
@@ -539,6 +549,21 @@
 
             .equipment-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .mobile-nav-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .mobile-nav-overlay.active {
+                display: block;
             }
 
             .mobile-nav-toggle {
@@ -868,6 +893,20 @@
     <script src="mobile-nav.js"></script>
     <script src="js/equipment.js"></script>
     <script>
+        // Initialize mobile navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize mobile navigation
+            initializeMobileNavigation();
+            
+            // Update equipment stats
+            updateEquipmentStats();
+            // Update stats every 30 seconds
+            setInterval(updateEquipmentStats, 30000);
+
+            // Check user role and apply restrictions
+            checkUserRoleAndApplyRestrictions();
+        });
+
         // Function to update equipment stats
         async function updateEquipmentStats() {
             try {
@@ -896,13 +935,6 @@
                 document.getElementById('remainingEquipment').textContent = '-';
             }
         }
-
-        // Call updateEquipmentStats when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            updateEquipmentStats();
-            // Update stats every 30 seconds
-            setInterval(updateEquipmentStats, 30000);
-        });
 
         // Mobile Navigation Toggle
         const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
@@ -987,12 +1019,6 @@
                 console.error('Error checking user role:', error);
             }
         }
-
-        // Call the function when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            checkUserRoleAndApplyRestrictions();
-            // The handleNavigationVisibility function from auth.js will be called by checkAuth()
-        });
 
         // Override the deleteEquipment function to prevent staff and junior staff from deleting
         const originalDeleteEquipment = window.deleteEquipment;

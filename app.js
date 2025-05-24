@@ -176,7 +176,7 @@ const enforceRoleAccess = (req, res, next) => {
             }
             
             // For all other API paths
-            if (!isAllowedPath) {
+        if (!isAllowedPath) {
                 return res.status(403).json({ error: 'Access denied' });
             }
             return next();
