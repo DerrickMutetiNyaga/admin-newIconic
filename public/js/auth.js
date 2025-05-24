@@ -22,6 +22,7 @@ function handleNavigationVisibility(userRole) {
     const stationsLink = document.querySelector('.station-link');
     const reportsLink = document.querySelector('a[href="reports.html"]')?.parentElement;
     const settingsLink = document.querySelector('a[href="settings.html"]')?.parentElement;
+    const remindersLink = document.querySelector('a[href="reminders.html"]')?.parentElement;
 
     // Remove all visible classes first
     allNavLinks.forEach(link => {
@@ -52,8 +53,21 @@ function handleNavigationVisibility(userRole) {
     } else if (userRole === 'admin' || userRole === 'superadmin') {
         // Show all links for admin and superadmin
         allNavLinks.forEach(link => {
-            link.classList.add('visible');
+            if (link) link.classList.add('visible');
         });
+    }
+
+    // Special handling for reminders link - only show for admin and superadmin
+    if (remindersLink) {
+        if (userRole === 'admin' || userRole === 'superadmin') {
+            remindersLink.style.display = 'block';
+        } else {
+            remindersLink.style.display = 'none';
+            // If on reminders page and not authorized, redirect to dashboard
+            if (window.location.pathname === '/reminders.html') {
+                window.location.href = '/index.html';
+            }
+        }
     }
 }
 

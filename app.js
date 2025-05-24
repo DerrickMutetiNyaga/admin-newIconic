@@ -36,7 +36,12 @@ app.use(express.static('public'));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB'))
+    .then(() => {
+        console.log('Connected to MongoDB');
+        const { startReminderScheduler } = require('./utils/reminderService');
+        startReminderScheduler();
+        console.log('Reminder scheduler started');
+    })
     .catch(err => console.error('MongoDB connection error:', err));
 
 // Models
@@ -384,6 +389,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/equipment', equipmentRouter);
 app.use('/api/equipment-assignments', equipmentAssignmentsRouter);
 app.use('/api/stations', stationsRouter);
+app.use('/api/reminders', require('./routes/reminders'));
 
 // Excel Export endpoint
 app.get('/api/tickets/export', requireAuth, async (req, res) => {
