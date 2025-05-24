@@ -5,8 +5,6 @@ const reminderModal = document.getElementById('reminderModal');
 const reminderForm = document.getElementById('reminderForm');
 const reminderSearch = document.getElementById('reminderSearch');
 const modalTitle = document.getElementById('modalTitle');
-const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
-const sidebar = document.querySelector('.sidebar');
 const logoutBtn = document.getElementById('logout');
 
 // Stats elements
@@ -17,24 +15,6 @@ const failedRemindersEl = document.getElementById('failedReminders');
 
 let reminders = [];
 let editingId = null;
-
-// Initialize mobile navigation
-initializeMobileNavigation();
-
-// Handle logout
-logoutBtn.addEventListener('click', async () => {
-    try {
-        const response = await fetch('/api/auth/logout', {
-            method: 'POST',
-            credentials: 'include'
-        });
-        if (response.ok) {
-            window.location.href = '/login.html';
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-    }
-});
 
 // Fetch reminders and update UI
 async function loadReminders() {
@@ -237,20 +217,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Close sidebar when clicking outside
-document.addEventListener('click', (e) => {
-    if (sidebar.classList.contains('active') && 
-        !sidebar.contains(e.target) && 
-        !mobileNavToggle.contains(e.target)) {
-        sidebar.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-});
-
-// Close sidebar on window resize if open
-window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
-        sidebar.classList.remove('active');
-        document.body.style.overflow = '';
+// Handle logout
+logoutBtn.addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            window.location.href = '/login.html';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
     }
 }); 
