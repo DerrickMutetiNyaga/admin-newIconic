@@ -458,12 +458,24 @@ async function loadEquipment() {
     }
 }
 
+// Add pagination state
+let currentPage = 1;
+const itemsPerPage = 9;
+
 // Display equipment in the grid
 function displayEquipment(equipment) {
     const equipmentList = document.getElementById('equipmentList');
     if (!equipmentList) {
         console.error('Equipment list element not found');
         return;
+    }
+
+    // Remove any existing pagination controls that are siblings
+    let nextElem = equipmentList.nextElementSibling;
+    while (nextElem && nextElem.classList.contains('pagination')) {
+        const toRemove = nextElem;
+        nextElem = nextElem.nextElementSibling;
+        toRemove.remove();
     }
 
     if (!equipment || equipment.length === 0) {
@@ -477,12 +489,17 @@ function displayEquipment(equipment) {
         return;
     }
 
-    console.log('Displaying equipment:', equipment); // Debug log
+    // Calculate pagination
+    const totalPages = Math.ceil(equipment.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedEquipment = equipment.slice(startIndex, endIndex);
 
     // Get user role for conditional rendering
     const userRole = document.getElementById('username')?.textContent?.match(/\((.*?)\)/)?.[1]?.toLowerCase();
 
-    equipmentList.innerHTML = equipment.map(item => `
+    // Display equipment cards
+    equipmentList.innerHTML = paginatedEquipment.map(item => `
         <div class="equipment-card">
             <div class="equipment-header">
                 <div class="equipment-title">
@@ -548,6 +565,33 @@ function displayEquipment(equipment) {
             </div>
         </div>
     `).join('');
+
+    // Add pagination controls if there are multiple pages
+    if (totalPages > 1) {
+        const paginationContainer = document.createElement('div');
+        paginationContainer.className = 'pagination';
+        paginationContainer.innerHTML = `
+            <button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span class="pagination-info">Page ${currentPage} of ${totalPages}</span>
+            <button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+        equipmentList.after(paginationContainer);
+    }
+}
+
+// Function to change page
+function changePage(newPage) {
+    if (newPage < 1) return;
+    const equipmentList = document.getElementById('equipmentList');
+    const totalPages = Math.ceil(equipmentList.dataset.totalItems / itemsPerPage);
+    if (newPage > totalPages) return;
+    
+    currentPage = newPage;
+    loadEquipment();
 }
 
 // Helper function to get status icon
