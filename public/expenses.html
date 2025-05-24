@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses - Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .auth-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .auth-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .main-content {
+            display: none;
+        }
+        .main-content.authenticated {
+            display: block;
+        }
+
+        /* Export section mobile styles */
+        @media (max-width: 768px) {
+            .export-controls {
+                flex-direction: column !important;
+                width: 100% !important;
+            }
+            
+            .export-controls input {
+                width: 100% !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .export-controls .export-btn {
+                width: 100% !important;
+            }
+        }
+
+        /* Custom sidebar styles for expenses.html */
+        .sidebar {
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+            color: white;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar .nav-links a {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+        }
+        
+        .sidebar .logo h2 {
+            color: white;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+        
+        .sidebar .logo p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        
+        .sidebar .user-profile {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 15px;
+        }
+        
+        .sidebar .logout-btn {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .logout-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .sidebar .nav-links i {
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+        }
+
+        .mobile-fab {
+            display: none;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+            z-index: 99999;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+        .mobile-fab i {
+            font-size: 20px;
+        }
+        .mobile-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        @media (max-width: 768px) {
+            .mobile-fab {
+                display: inline-flex !important;
+            }
+            .header-right {
+                display: none !important;
+            }
+        }
+
+        .expense-category.salaries {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .expense-category.equipment {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .expense-category.transport {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .expense-category.internet-payment {
+            background-color: #9b59b6;  /* Purple color for Internet Payment */
+            color: white;
+        }
+
+        .expense-category.other {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        /* Chart legend colors */
+        .legend-color.salaries {
+            background-color: #3498db;
+        }
+
+        .legend-color.equipment {
+            background-color: #2ecc71;
+        }
+
+        .legend-color.transport {
+            background-color: #e74c3c;
+        }
+
+        .legend-color.internet-payment {
+            background-color: #9b59b6;
+        }
+
+        .legend-color.other {
+            background-color: #95a5a6;
+        }
+
+        /* Expense card styles */
+        .expense-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .expense-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .expense-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .expense-category {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .expense-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .expense-details div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expense-details .amount {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .expense-notes {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.9em;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .expense-notes i {
+            margin-top: 3px;
+        }
+
+        .expense-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-icon.delete {
+            color: #e74c3c;
+        }
+
+        .btn-icon.delete:hover {
+            background-color: #fee2e2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication loading overlay -->
+    <div class="auth-loading" id="authLoading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>ICONIC</h2>
+                <p>Administration Management</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
+                <li><a href="expenses.html" class="active"><i class="fas fa-receipt"></i> Expenses</a></li>
+                <li id="approvalsLink" style="display: none;"><a href="approvals.html"><i class="fas fa-users-cog"></i> User Management</a></li>
+                <li><a href="equipment.html"><i class="fas fa-network-wired"></i> Equipment</a></li>
+                <li><a href="equipment-assignment.html"><i class="fas fa-link"></i> Assign Equipment</a></li>
+                <li><a href="stations.html"><i class="fas fa-map-marker-alt"></i> Stations</a></li>
+            </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="username">Loading...</span>
+                        <button id="logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <button class="mobile-nav-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Expenses <button class="mobile-fab" id="mobileNewExpenseBtn" aria-label="Add new expense">
+                        <i class="fas fa-plus"></i>
+                    </button></h1>
+                    <p class="date">Today: <span id="currentDate"></span></p>
+                </div>
+                <div class="header-right">
+                    <button class="btn-primary" id="newExpenseBtn">
+                        <i class="fas fa-plus"></i> New Expense
+                    </button>
+                </div>
+            </header>
+
+            <div class="filters-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search expenses...">
+                </div>
+                <div class="filter-group">
+                    <select id="categoryFilter">
+                        <option value="All Categories">All Categories</option>
+                        <option value="Salaries">Salaries</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Internet Payment">Internet Payment</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select id="paymentMethodFilter">
+                        <option value="All Payment Methods">All Payment Methods</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Credit Card">Credit Card</option>
+                    </select>
+                    <input type="text" id="dateRangeFilter" placeholder="Select Date Range" readonly>
+                    <button id="resetFilters" class="btn-secondary">
+                        <i class="fas fa-sync-alt"></i> Reset Filters
+                    </button>
+                </div>
+                <div class="export-section">
+                    <div class="export-controls">
+                        <input type="text" id="exportDateRange" placeholder="Select Export Date Range" readonly>
+                        <button id="exportBtn" class="export-btn">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon expense">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Expenses</h3>
+                        <p id="totalAmount">KES 0.00</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon monthly">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Monthly Total</h3>
+                        <p id="monthlyAmount">KES 0.00</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon category">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Categories</h3>
+                        <p id="categoryCount">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon average">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Daily Average</h3>
+                        <p id="dailyAverage">KES 0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Expense Categories</h3>
+                        <div class="chart-actions">
+                            <button class="refresh-chart" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color salaries"></div>
+                            <span>Salaries</span>
+                            <span class="legend-count" id="salariesCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color equipment"></div>
+                            <span>Equipment</span>
+                            <span class="legend-count" id="equipmentCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color transport"></div>
+                            <span>Transport</span>
+                            <span class="legend-count" id="transportCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color internet-payment"></div>
+                            <span>Internet Payment</span>
+                            <span class="legend-count" id="internetPaymentCount">0</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color other"></div>
+                            <span>Other</span>
+                            <span class="legend-count" id="otherCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Monthly Expenses</h3>
+                        <div class="chart-actions">
+                            <button class="refresh-chart" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monthlyBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Expense Trend</h3>
+                        <div class="chart-actions">
+                            <button class="refresh-chart" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trendLineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="expenses-section">
+                <div id="expensesList" class="expenses-grid">
+                    <!-- Expenses will be dynamically inserted here -->
+                </div>
+                <div id="noExpenses" class="expenses-empty" style="display: none;">
+                    <i class="fas fa-receipt"></i>
+                    <p>No expenses found</p>
+                    <span>Add a new expense or adjust your filters</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Expense Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Expense</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="expenseName">Expense Name *</label>
+                    <input type="text" id="expenseName" required>
+                </div>
+                <div class="form-group">
+                    <label for="expenseCategory">Category *</label>
+                    <select id="expenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Salaries">Salaries</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Internet Payment">Internet Payment</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expenseAmount">Amount (KES) *</label>
+                    <input type="number" id="expenseAmount" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="expenseDate">Date and Time *</label>
+                    <input type="text" id="expenseDate" required readonly>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method *</label>
+                    <select id="paymentMethod" required>
+                        <option value="">Select Payment Method</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Credit Card">Credit Card</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expenseNotes">Notes</label>
+                    <textarea id="expenseNotes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Expense</button>
+                    <button type="button" class="btn-secondary close-modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Ticket Modal -->
+    <div id="editTicketModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Ticket Status</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="editTicketForm">
+                <input type="hidden" id="editTicketId">
+                <div class="form-group">
+                    <label for="editTicketStatus">Status:</label>
+                    <select id="editTicketStatus" required>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="mobile-nav.js"></script>
+    <script src="expenses.js"></script>
+    <script>
+        // Function to check user role and apply restrictions
+        async function checkUserRoleAndApplyRestrictions() {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                // Update username with role indicator
+                const usernameElement = document.getElementById('username');
+                const approvalsLink = document.getElementById('approvalsLink');
+                
+                if (data.role === 'staff') {
+                    if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                        usernameElement.textContent = `${data.username} (Staff)`;
+                    }
+                } else if (data.role === 'admin') {
+                    if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                        usernameElement.textContent = `${data.username} (Admin)`;
+                    }
+                } else if (data.role === 'superadmin') {
+                    if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                        usernameElement.textContent = `${data.username} (Superadmin)`;
+                    }
+                    
+                    // Show approvals link for superadmin
+                    if (approvalsLink) {
+                        approvalsLink.style.display = 'block';
+                    }
+
+                    // Update logo text
+                    const logoText = document.querySelector('.logo p');
+                    if (logoText) {
+                        logoText.textContent = 'Admin Portal';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking user role:', error);
+            }
+        }
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
+    </script>
+</body>
+</html> 

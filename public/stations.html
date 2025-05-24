@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stations - Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-loading {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .auth-loading .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .main-content { display: none; }
+        .main-content.authenticated { display: block; }
+        .sidebar {
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+            color: white;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar .nav-links a {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar .logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+        }
+        .sidebar .logo h2 {
+            color: white;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+        .sidebar .logo p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .sidebar .user-profile {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 15px;
+        }
+        .sidebar .logout-btn {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .logout-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .sidebar .nav-links i {
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+        }
+        .mobile-fab {
+            display: none;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+            z-index: 99999;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+        .mobile-fab i { font-size: 20px; }
+        .mobile-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        @media (max-width: 768px) {
+            .mobile-fab { display: inline-flex !important; }
+            .header-right { display: none !important; }
+        }
+        .stations-section {
+            margin-top: 24px;
+        }
+        .stations-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .stations-header h1 {
+            font-size: 1.5em;
+            color: #223046;
+            margin: 0;
+        }
+        .stations-header .date {
+            color: #888;
+            font-size: 1em;
+            margin-left: 18px;
+        }
+        .stations-header .mobile-fab { margin-left: 10px; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 10px 24px;
+            font-size: 1.08em;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+            transition: background 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover { background: #2980b9; }
+        .search-box {
+            position: relative;
+            flex: 1 1 0;
+            max-width: 500px;
+            min-width: 180px;
+            margin: 0 18px 18px 0;
+            display: flex;
+            align-items: center;
+        }
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b0b8c1;
+            font-size: 1.1em;
+        }
+        .styled-search {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            border-radius: 7px;
+            border: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            font-size: 1.08em;
+        }
+        .stations-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .expense-card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 12px 10px 12px;
+            margin-bottom: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 0;
+            max-width: 100%;
+        }
+        .expense-card h3 {
+            font-size: 1em;
+        }
+        .expense-header {
+            margin-bottom: 10px;
+        }
+        .expense-details {
+            font-size: 0.93em;
+            margin-bottom: 8px;
+        }
+        .expense-notes {
+            font-size: 0.92em;
+            margin-bottom: 8px;
+        }
+        .expense-actions {
+            gap: 6px;
+        }
+        .station-card {
+            background: white;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .station-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .station-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .station-title h3 {
+            margin: 0;
+            font-size: 1.15em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .station-location {
+            font-size: 0.98em;
+            color: #666;
+            margin-top: 2px;
+        }
+        .station-description {
+            color: #888;
+            font-size: 0.97em;
+            margin-top: 2px;
+        }
+        .station-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            color: #666;
+        }
+        .btn-icon:hover { background: #f8f9fa; }
+        .btn-icon.edit:hover { color: #3498db; background: #e3f2fd; }
+        .btn-icon.delete:hover { color: #e74c3c; background: #fde8e8; }
+        .station-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+            background: #e8f5e9;
+            color: #2e7d32;
+            box-shadow: 0 2px 4px rgba(46, 125, 50, 0.1);
+        }
+        .station-status.inactive {
+            background: #ffebee;
+            color: #e74c3c;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 2px dashed #e0e0e0;
+        }
+        .no-data i {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 15px;
+            background: #e3f2fd;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+        .no-data p {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .no-data span {
+            color: #666;
+            font-size: 0.9em;
+        }
+        @media (max-width: 768px) {
+            .stations-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .header-right { width: 100%; justify-content: center; }
+            .btn-primary { width: 100%; justify-content: center; }
+            .station-card { padding: 14px 8px; }
+        }
+        @media (max-width: 900px) {
+            .stations-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .stations-list {
+                grid-template-columns: 1fr;
+            }
+            .expense-card {
+                padding: 10px 6px 8px 8px;
+            }
+        }
+        /* --- Modal Redesign Styles --- */
+        #stationModal .modal-content {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
+            padding: 0 0 28px 0;
+            max-width: 370px;
+            margin: auto;
+            position: relative;
+            animation: modalPop 0.25s cubic-bezier(.4,2,.6,1) 1;
+        }
+        @keyframes modalPop {
+            0% { transform: scale(0.95) translateY(30px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        #stationModal .modal-header {
+            background: linear-gradient(90deg, #3498db 60%, #2ecc71 100%);
+            color: #fff;
+            border-radius: 18px 18px 0 0;
+            padding: 22px 28px 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+        }
+        #stationModal .modal-header h2 {
+            font-size: 1.25em;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+        #stationModal .modal-header i {
+            font-size: 1.3em;
+        }
+        #stationModal .close-modal {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.7em;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.2s;
+        }
+        #stationModal .close-modal:hover {
+            color: #e74c3c;
+        }
+        #stationModal form {
+            padding: 22px 28px 0 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        #stationModal .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        #stationModal label {
+            font-size: 1em;
+            color: #223046;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        #stationModal input[type="text"],
+        #stationModal textarea {
+            border: 1.5px solid #e0e0e0;
+            border-radius: 7px;
+            padding: 11px 13px;
+            font-size: 1em;
+            background: #f8f9fa;
+            transition: border 0.2s;
+        }
+        #stationModal input[type="text"]:focus,
+        #stationModal textarea:focus {
+            border: 1.5px solid #3498db;
+            outline: none;
+            background: #fff;
+        }
+        #stationModal textarea {
+            resize: vertical;
+            min-height: 38px;
+            max-height: 90px;
+        }
+        #stationModal .form-group.checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin-top: 2px;
+        }
+        #stationModal .form-group.checkbox-group label {
+            margin: 0;
+            font-weight: 500;
+            color: #223046;
+            font-size: 1em;
+        }
+        #stationModal input[type="checkbox"] {
+            accent-color: #3498db;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+        #stationModal .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+        #stationModal .btn-primary {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 10px 22px;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+            transition: background 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #stationModal .btn-primary:hover { background: #2980b9; }
+        #stationModal .btn-secondary {
+            background: #f4f6f8;
+            color: #223046;
+            border: none;
+            border-radius: 7px;
+            padding: 10px 18px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #stationModal .btn-secondary:hover { background: #e0e0e0; }
+        #stationModal #formNotification {
+            margin-top: 8px;
+            font-size: 0.98em;
+            text-align: left;
+        }
+        #stationModal .notification.success { color: #2ecc71; }
+        #stationModal .notification.error { color: #e74c3c; }
+        @media (max-width: 500px) {
+            #stationModal .modal-content {
+                max-width: 98vw;
+                padding: 0 0 18px 0;
+            }
+            #stationModal form {
+                padding: 18px 10px 0 10px;
+            }
+            #stationModal .modal-header {
+                padding: 18px 10px 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication loading overlay -->
+    <div class="auth-loading" id="authLoading">
+        <div class="spinner"></div>
+    </div>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>ICONIC</h2>
+                <p>Administration Management</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="tickets.html"><i class="fas fa-ticket-alt"></i> <span>Tickets</span></a></li>
+                <li><a href="expenses.html"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+                <li><a href="equipment.html"><i class="fas fa-network-wired"></i> <span>Equipment</span></a></li>
+                <li><a href="equipment-assignment.html"><i class="fas fa-link"></i> <span>Assign Equipment</span></a></li>
+                <li class="station-link" style="display:block;"><a href="station.html" class="active"><i class="fas fa-map-marker-alt"></i> <span>Station</span></a></li>
+            </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="username">Loading...</span>
+                        <button id="logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <button class="mobile-nav-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Stations <button class="mobile-fab" id="mobileNewStationBtn" aria-label="Add new station">
+                        <i class="fas fa-plus"></i>
+                    </button></h1>
+                    <p class="date">Today: <span id="currentDate"></span></p>
+                </div>
+                <div class="header-right">
+                    <button class="btn-primary" id="newStationBtn">
+                        <i class="fas fa-plus"></i> New Station
+                    </button>
+                </div>
+            </header>
+            <div class="filters-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="stationSearch" class="styled-search" placeholder="Search stations...">
+                </div>
+            </div>
+            <div class="stations-section">
+                <div id="stationsList" class="stations-list">
+                    <!-- Station cards will be dynamically inserted here -->
+                </div>
+                <div id="noStations" class="no-data" style="display: none;">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <p>No stations found</p>
+                    <span>Add a new station or adjust your search</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Add/Edit Station Modal (structure similar to expenses modal) -->
+    <div id="stationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="stationModalTitle"><i class="fas fa-plus"></i> Add New Station</h2>
+                <button class="close-modal" id="closeStationModal">&times;</button>
+            </div>
+            <form id="stationForm">
+                <input type="hidden" id="stationId">
+                <div class="form-group">
+                    <label for="stationName">Station Name *</label>
+                    <input type="text" id="stationName" required>
+                </div>
+                <div class="form-group">
+                    <label for="stationLocation">Location</label>
+                    <input type="text" id="stationLocation">
+                </div>
+                <div class="form-group">
+                    <label for="stationDescription">Description</label>
+                    <textarea id="stationDescription" rows="2"></textarea>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="stationIsActive" checked>
+                    <label for="stationIsActive">Active</label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" id="saveStationBtn"><i class="fas fa-save"></i> Save Station</button>
+                    <button type="button" class="btn-secondary close-modal">Cancel</button>
+                </div>
+                <div id="formNotification"></div>
+            </form>
+        </div>
+    </div>
+    <!-- Scripts for authentication, modal, and CRUD logic will be added here -->
+    <script>
+    // Authentication check and user info
+    // ... existing code ...
+
+    // Modal logic for Add/Edit Station
+    const stationModal = document.getElementById('stationModal');
+    const openAddBtn = document.getElementById('newStationBtn');
+    const openAddFab = document.getElementById('mobileNewStationBtn');
+    const closeStationModalBtn = document.getElementById('closeStationModal');
+    const cancelBtns = document.querySelectorAll('.close-modal');
+    function openStationModal(edit = false, station = null) {
+        document.getElementById('stationForm').reset();
+        document.getElementById('formNotification').textContent = '';
+        document.getElementById('formNotification').className = '';
+        document.getElementById('stationId').value = '';
+        document.getElementById('stationIsActive').checked = true;
+        if (edit && station) {
+            document.getElementById('stationModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Station';
+            document.getElementById('stationId').value = station._id;
+            document.getElementById('stationName').value = station.name || '';
+            document.getElementById('stationLocation').value = station.location || '';
+            document.getElementById('stationDescription').value = station.description || '';
+            document.getElementById('stationIsActive').checked = station.isActive !== false;
+        } else {
+            document.getElementById('stationModalTitle').innerHTML = '<i class="fas fa-plus"></i> Add New Station';
+        }
+        stationModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeStationModal() {
+        stationModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    openAddBtn.onclick = () => openStationModal(false);
+    openAddFab.onclick = () => openStationModal(false);
+    closeStationModalBtn.onclick = closeStationModal;
+    cancelBtns.forEach(btn => btn.onclick = closeStationModal);
+    stationModal.onclick = function(e) { if (e.target === stationModal) closeStationModal(); };
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeStationModal();
+    });
+
+    // Add/Edit Station form submission
+    const stationForm = document.getElementById('stationForm');
+    stationForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const id = document.getElementById('stationId').value;
+        const name = document.getElementById('stationName').value.trim();
+        const location = document.getElementById('stationLocation').value.trim();
+        const description = document.getElementById('stationDescription').value.trim();
+        const isActive = document.getElementById('stationIsActive').checked;
+        const notification = document.getElementById('formNotification');
+        notification.textContent = '';
+        notification.className = '';
+        if (!name) {
+            notification.textContent = 'Station name is required.';
+            notification.className = 'notification error';
+            return;
+        }
+        try {
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/stations/${id}` : '/api/stations';
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ name, location, description, isActive })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to save station');
+            notification.textContent = id ? 'Station updated successfully!' : 'Station added successfully!';
+            notification.className = 'notification success';
+            setTimeout(() => {
+                closeStationModal();
+                loadStations();
+            }, 800);
+        } catch (err) {
+            notification.textContent = err.message;
+            notification.className = 'notification error';
+        }
+    };
+
+    // Load stations and render as cards
+    async function loadStations() {
+        const list = document.getElementById('stationsList');
+        const noStations = document.getElementById('noStations');
+        list.innerHTML = '<span>Loading...</span>';
+        try {
+            const res = await fetch('/api/stations', { credentials: 'include' });
+            if (!res.ok) throw new Error('Failed to fetch stations');
+            const stations = await res.json();
+            let filtered = stations;
+            const search = document.getElementById('stationSearch').value.trim().toLowerCase();
+            if (search) {
+                filtered = stations.filter(s =>
+                    (s.name && s.name.toLowerCase().includes(search)) ||
+                    (s.location && s.location.toLowerCase().includes(search)) ||
+                    (s.description && s.description.toLowerCase().includes(search))
+                );
+            }
+            if (!filtered.length) {
+                list.innerHTML = '';
+                noStations.style.display = '';
+                return;
+            }
+            noStations.style.display = 'none';
+            list.innerHTML = filtered.map(station => {
+                // Status badge color
+                const statusColor = station.isActive === false ? '#95a5a6' : '#2ecc71';
+                const statusText = station.isActive === false ? 'Inactive' : 'Active';
+                const statusClass = station.isActive === false ? 'expense-category' : 'expense-category';
+                return `
+                    <div class="expense-card" style="border-left: 5px solid #3498db; box-shadow: 0 2px 8px rgba(52,152,219,0.08);">
+                        <div class="expense-header">
+                            <h3 style="text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin:0;">${station.name}</h3>
+                            <span class="${statusClass}" style="background:${statusColor};color:#fff;">${statusText}</span>
+                        </div>
+                        <div class="expense-details">
+                            <div>
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${station.location || 'No location'}
+                            </div>
+                            <div>
+                                <i class="fas fa-calendar"></i>
+                                ${station.createdAt ? new Date(station.createdAt).toLocaleString() : ''}
+                            </div>
+                        </div>
+                        ${station.description ? `
+                            <div class="expense-notes">
+                                <i class="fas fa-info-circle"></i> ${station.description}
+                            </div>
+                        ` : ''}
+                        <div class="expense-actions">
+                            <button class="btn-icon" onclick='editStation(${JSON.stringify(station)})' title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" onclick='deleteStation("${station._id}")' title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            list.innerHTML = `<span style=\"color:#c62828;\">${err.message}</span>`;
+            noStations.style.display = 'none';
+        }
+    }
+    window.editStation = function(station) {
+        openStationModal(true, station);
+    };
+    window.deleteStation = async function(id) {
+        if (!confirm('Are you sure you want to delete this station?')) return;
+        try {
+            const res = await fetch(`/api/stations/${id}`, { method: 'DELETE', credentials: 'include' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to delete station');
+            showNotification('Station deleted successfully', 'success');
+            loadStations();
+        } catch (err) {
+            showNotification(err.message, 'error');
+        }
+    };
+    document.getElementById('stationSearch').addEventListener('input', () => loadStations());
+    // Show notification helper
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+    // Date in header
+    function updateCurrentDate() {
+        const date = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', options);
+    }
+    document.addEventListener('DOMContentLoaded', updateCurrentDate);
+    // Auth loading overlay logic
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('authLoading').style.display = 'none';
+        document.querySelector('.main-content').classList.add('authenticated');
+        loadStations();
+    });
+    // Logout
+    // ... existing code ...
+
+    // User authentication and role display (copied from expenses.html)
+    async function checkUserRoleAndApplyRestrictions() {
+        try {
+            const response = await fetch('/api/auth/check', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            // Update username with role indicator
+            const usernameElement = document.getElementById('username');
+            const approvalsLink = document.getElementById('approvalsLink');
+            if (data.role === 'staff') {
+                if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                    usernameElement.textContent = `${data.username} (Staff)`;
+                }
+            } else if (data.role === 'admin') {
+                if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                    usernameElement.textContent = `${data.username} (Admin)`;
+                }
+            } else if (data.role === 'superadmin') {
+                if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                    usernameElement.textContent = `${data.username} (Superadmin)`;
+                }
+                // Show approvals link for superadmin
+                if (approvalsLink) {
+                    approvalsLink.style.display = 'block';
+                }
+                // Update logo text
+                const logoText = document.querySelector('.logo p');
+                if (logoText) {
+                    logoText.textContent = 'Admin Portal';
+                }
+            }
+        } catch (error) {
+            console.error('Error checking user role:', error);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
+    </script>
+    <script src="mobile-nav.js"></script>
+</body>
+</html> 

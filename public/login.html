@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            color: #1a472a;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .login-header i {
+            margin-right: 10px;
+            color: #2d8659;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1a472a;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #2d8659;
+            outline: none;
+        }
+
+        .form-actions {
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #2d8659;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary:hover {
+            background: #1a472a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+
+        .form-footer a {
+            color: #2d8659;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            color: #1a472a;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .success-message {
+            color: #2ecc71;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 8px;
+        }
+
+        .forgot-password a {
+            color: #2d8659;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .forgot-password a:hover {
+            color: #1a472a;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2><i class="fas fa-ticket-alt"></i> ICONIC FIBRE</h2>
+                <p>Please login to continue</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <div class="forgot-password">
+                        <a href="/forgot-password.html">Forgot Password?</a>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+            </form>
+            <div class="form-footer">
+                <p>Don't have an account? <a href="/signup.html">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for registration success message
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('registered') === 'true') {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = 'Registration successful! Please login.';
+            successMessage.style.display = 'block';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success message
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
+                    
+                    // Store user info in sessionStorage
+                    sessionStorage.setItem('username', data.username);
+                    sessionStorage.setItem('role', data.role);
+
+                    // Wait for 2 seconds to show the success message
+                    setTimeout(async () => {
+                        try {
+                            const sessionCheck = await fetch('/api/auth/check', {
+                                credentials: 'include'
+                            });
+                            const sessionData = await sessionCheck.json();
+                            
+                            if (sessionData.authenticated) {
+                                const role = sessionData.role.toLowerCase();
+                                
+                                // Define allowed roles and their redirects
+                                const redirects = {
+                                    'juniorstaff': '/tickets.html',
+                                    'staff': '/tickets.html',
+                                    'admin': '/tickets.html',
+                                    'superadmin': '/index.html'
+                                };
+                                
+                                // If user has an allowed role, redirect them
+                                if (redirects[role]) {
+                                    window.location.href = redirects[role];
+                                } else {
+                                    // For any other role, redirect to blank.html
+                                    window.location.href = '/blank.html';
+                                }
+                    } else {
+                                errorMessage.textContent = 'Session not established. Please try again.';
+                                errorMessage.style.display = 'block';
+                                successMessage.style.display = 'none';
+                            }
+                        } catch (error) {
+                            console.error('Session check error:', error);
+                            errorMessage.textContent = 'Error checking session. Please try again.';
+                        errorMessage.style.display = 'block';
+                            successMessage.style.display = 'none';
+                    }
+                    }, 2000); // 2 second delay
+                } else {
+                    errorMessage.textContent = data.error || 'Login failed';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'Login failed. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .activity-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .activity-status.open {
+            background-color: #ffebee;
+            color: #e74c3c;
+        }
+
+        .activity-status.in-progress {
+            background-color: #e3f2fd;
+            color: #3498db;
+        }
+
+        .activity-status.resolved {
+            background-color: #e8f5e9;
+            color: #2ecc71;
+        }
+
+        /* Custom sidebar styles for index.html */
+        .sidebar {
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+            color: white;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar .nav-links a {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+        }
+        
+        .sidebar .logo h2 {
+            color: white;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+        
+        .sidebar .logo p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        
+        .sidebar .user-profile {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 15px;
+        }
+        
+        .sidebar .logout-btn {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .logout-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .sidebar .nav-links i {
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>ICONIC</h2>
+                <p>Administration Management</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" data-page="tickets"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
+                <li><a href="#" data-page="expenses"><i class="fas fa-receipt"></i> Expenses</a></li>
+                <li id="approvalsLink" style="display: none;"><a href="approvals.html"><i class="fas fa-users-cog"></i> User Management</a></li>
+                <li><a href="equipment.html"><i class="fas fa-network-wired"></i> Equipment</a></li>
+                <li><a href="equipment-assignment.html"><i class="fas fa-link"></i> Assign Equipment</a></li>
+                <li><a href="stations.html"><i class="fas fa-map-marker-alt"></i> Stations</a></li>
+            </ul>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="username">Loading...</span>
+                        <button id="logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <button class="mobile-nav-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Dashboard</h1>
+                    <p class="date">Today: <span id="currentDate"></span></p>
+                </div>
+                <div class="header-right">
+                    <button class="btn-primary" id="newTicketBtn">
+                        <i class="fas fa-plus"></i> New Ticket
+                    </button>
+                    <button class="btn-secondary" id="newExpenseBtn">
+                        <i class="fas fa-plus"></i> New Expense
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon ticket">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Tickets</h3>
+                        <p id="totalTickets">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon open">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Open Tickets</h3>
+                        <p id="openTickets">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon progress">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>In Progress</h3>
+                        <p id="inProgressTickets">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon resolved">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Resolved</h3>
+                        <p id="resolvedTickets">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon expense">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Expenses</h3>
+                        <p id="totalExpenses">$0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon monthly">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Monthly Expenses</h3>
+                        <p id="monthlyExpenses">$0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="station-categories">
+                <h3>Ticket Categories by Station</h3>
+                        <div class="chart-container">
+                            <canvas id="stationCategoriesChart"></canvas>
+                        </div>
+                        <div class="category-legend">
+                            <div class="legend-item">
+                        <div class="legend-color installation"></div>
+                                <span>Installation</span>
+                            </div>
+                            <div class="legend-item">
+                        <div class="legend-color los"></div>
+                                <span>LOS</span>
+                            </div>
+                            <div class="legend-item">
+                        <div class="legend-color other"></div>
+                                <span>Other</span>
+                            </div>
+                        </div>
+            </div> -->
+
+            <div class="recent-activities">
+                <div class="recent-tickets-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-ticket-alt"></i> Recent Tickets</h3>
+                        <a href="/tickets.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="activity-list" id="recentTicketsList">
+                        <!-- Recent tickets will be populated here -->
+                    </div>
+                </div>
+
+                <div class="recent-expenses-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-receipt"></i> Recent Expenses</h3>
+                        <a href="/expenses.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="activity-list" id="recentExpensesList">
+                        <!-- Recent expenses will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+            </div>
+
+            <!-- Edit Ticket Modal -->
+            <div id="editTicketModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Update Ticket Status</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="editTicketForm">
+                        <input type="hidden" id="editTicketId">
+                        <div class="form-group">
+                            <label for="editTicketStatus">Status:</label>
+                            <select id="editTicketStatus" required>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Status</button>
+                            <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Expense Modal -->
+            <div id="editExpenseModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Edit Expense</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="editExpenseForm">
+                        <input type="hidden" id="editExpenseId">
+                        <div class="form-group">
+                            <label for="editExpenseName">Expense Name *</label>
+                            <input type="text" id="editExpenseName" required placeholder="Enter expense name">
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseCategory">Category *</label>
+                            <select id="editExpenseCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Salaries">Salaries</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseAmount">Amount (KES) *</label>
+                            <input type="number" id="editExpenseAmount" required placeholder="Enter amount in KES">
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseDate">Date and Time *</label>
+                            <input type="datetime-local" id="editExpenseDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpensePaymentMethod">Payment Method *</label>
+                            <select id="editExpensePaymentMethod" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseNotes">Notes</label>
+                            <textarea id="editExpenseNotes" placeholder="Enter any additional notes"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="closeModal('editExpenseModal')">Cancel</button>
+                            <button type="submit" class="btn-primary">Update Expense</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ticket Modal -->
+            <div id="ticketModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Create A Ticket</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="ticketForm">
+                        <div class="form-group">
+                            <label for="clientName">Client Name *</label>
+                            <input type="text" id="clientName" required placeholder="Enter client name">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientNumber">Client Number *</label>
+                            <input type="tel" id="clientNumber" required placeholder="Enter client number">
+                        </div>
+                        <div class="form-group">
+                            <label for="stationLocation">Station/Location *</label>
+                            <select id="stationLocation" required>
+                                <option value="">Select a station</option>
+                                <option value="Gilgil">Gilgil</option>
+                                <option value="Naivasha">Naivasha</option>
+                                <option value="Muranga">Muranga</option>
+                                <option value="Prof">Prof</option>
+                                <option value="Exec Married">Exec Married</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="houseNumber">House Number/Barrack Name *</label>
+                            <input type="text" id="houseNumber" required placeholder="Enter house number">
+                        </div>
+                        <div class="form-group">
+                            <label for="problemDescription">Problem Being Experienced *</label>
+                            <textarea id="problemDescription" required placeholder="Describe the problem"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportedDateTime">Date and Time Problem Reported</label>
+                            <input type="datetime-local" id="reportedDateTime">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create Ticket</button>
+                            <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Expense Form Modal -->
+            <div id="expenseModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add New Expense</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="expenseForm">
+                        <div class="form-group">
+                            <label for="expenseName">Expense Name *</label>
+                            <input type="text" id="expenseName" required placeholder="Enter expense name">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseCategory">Category *</label>
+                            <select id="expenseCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Salaries">Salaries</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseAmount">Amount (KES) *</label>
+                            <input type="number" id="expenseAmount" required placeholder="Enter amount in KES">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseDate">Date and Time *</label>
+                            <input type="datetime-local" id="expenseDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expensePaymentMethod">Payment Method *</label>
+                            <select id="expensePaymentMethod" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseNotes">Notes</label>
+                            <textarea id="expenseNotes" placeholder="Enter any additional notes"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Expense</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Scripts -->
+            <script src="app.js"></script>
+
+            <script>
+                // Check authentication status
+                async function checkAuth() {
+                    try {
+                        const response = await fetch('/api/auth/check');
+                        const data = await response.json();
+                        
+                        if (!data.authenticated) {
+                            window.location.href = '/login.html';
+                            return;
+                        }
+
+                        // Update username display
+                        document.getElementById('username').textContent = data.username;
+
+                        // Show/hide approvals link based on role
+                        const approvalsLink = document.getElementById('approvalsLink');
+                        if (data.role === 'admin' || data.role === 'superadmin') {
+                            approvalsLink.style.display = 'block';
+                        } else {
+                            approvalsLink.style.display = 'none';
+                        }
+
+                        // Load dashboard data
+                        loadDashboardData();
+                    } catch (error) {
+                        console.error('Auth check failed:', error);
+                        window.location.href = '/login.html';
+                    }
+                }
+
+                // Call checkAuth when page loads
+                checkAuth();
+
+                // Logout handler
+                document.getElementById('logout').addEventListener('click', async () => {
+                    try {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        window.location.href = '/login.html';
+                    } catch (error) {
+                        console.error('Logout failed:', error);
+                    }
+                });
+
+                // Function to check user role and apply restrictions
+                async function checkUserRoleAndApplyRestrictions() {
+                    try {
+                        const response = await fetch('/api/auth/check', {
+                            credentials: 'include'
+                        });
+                        const data = await response.json();
+                        
+                        // Update username with role indicator
+                        const usernameElement = document.getElementById('username');
+                        const approvalsLink = document.getElementById('approvalsLink');
+                        
+                        if (data.role === 'staff') {
+                            // Staff restrictions
+                            const expensesLink = document.querySelector('a[data-page="expenses"]');
+                            if (expensesLink) {
+                                expensesLink.parentElement.style.display = 'none';
+                            }
+
+                            if (usernameElement && !usernameElement.textContent.includes('(Staff)')) {
+                                usernameElement.textContent = `${data.username} (Staff)`;
+                            }
+                        } else if (data.role === 'admin') {
+                            if (usernameElement && !usernameElement.textContent.includes('(Admin)')) {
+                                usernameElement.textContent = `${data.username} (Admin)`;
+                            }
+                        } else if (data.role === 'superadmin') {
+                            if (usernameElement && !usernameElement.textContent.includes('(Superadmin)')) {
+                                usernameElement.textContent = `${data.username} (Superadmin)`;
+                            }
+                            
+                            // Show approvals link for superadmin
+                            if (approvalsLink) {
+                                approvalsLink.style.display = 'block';
+                            }
+
+                            // Update logo text
+                            const logoText = document.querySelector('.logo p');
+                            if (logoText) {
+                                logoText.textContent = 'Admin Portal';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error checking user role:', error);
+                    }
+                }
+
+                // Call the function when the page loads
+                document.addEventListener('DOMContentLoaded', checkUserRoleAndApplyRestrictions);
+            </script>
+</body>
+</html> 
