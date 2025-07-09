@@ -814,8 +814,11 @@ app.post('/api/auth/forgot-password', recoveryLimiter, async (req, res) => {
         // Generate recovery token
         const token = await user.generateRecoveryToken();
         
-        // Create recovery URL
-        const recoveryUrl = `${process.env.BASE_URL}/reset-password.html?token=${token}`;
+        // Create recovery URL - automatically detect current URL
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.headers.host;
+        const baseUrl = `${protocol}://${host}`;
+        const recoveryUrl = `${baseUrl}/reset-password.html?token=${token}`;
         
         // Format phone number (remove any non-digit characters and ensure it starts with country code)
         let formattedPhone = phone.replace(/\D/g, '');
