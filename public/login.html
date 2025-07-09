@@ -72,6 +72,12 @@
             outline: none;
         }
 
+        .form-group input:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
         .form-actions {
             text-align: center;
         }
@@ -88,10 +94,17 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: #1a472a;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .form-footer {
@@ -131,6 +144,17 @@
             border-radius: 5px;
         }
 
+        .lockout-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 10px;
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 5px;
+            border: 2px solid #e74c3c;
+            font-weight: bold;
+        }
+
         .forgot-password {
             text-align: right;
             margin-top: 8px;
@@ -146,6 +170,25 @@
         .forgot-password a:hover {
             color: #1a472a;
             text-decoration: underline;
+        }
+
+        .attempt-counter {
+            text-align: center;
+            margin-top: 10px;
+            color: #e67e22;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .locked-form {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .locked-form .form-group input,
+        .locked-form .btn-primary,
+        .locked-form a {
+            pointer-events: none;
         }
     </style>
 </head>
@@ -175,6 +218,12 @@
                 </div>
                 <div id="errorMessage" class="error-message"></div>
                 <div id="successMessage" class="success-message"></div>
+                <div id="lockoutMessage" class="lockout-message" style="display: none;">
+                    <i class="fas fa-lock"></i> Account Locked
+                    <br>
+                    <small>Too many failed login attempts. Please contact administrator.</small>
+                </div>
+                <div id="attemptCounter" class="attempt-counter" style="display: none;"></div>
             </form>
             <div class="form-footer">
                 <p>Don't have an account? <a href="/signup.html">Sign up</a></p>
@@ -183,16 +232,167 @@
     </div>
 
     <script>
-        // Check for registration success message
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('registered') === 'true') {
+        // Login attempt limiting system
+        const MAX_ATTEMPTS = 4;
+        const LOCKOUT_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        
+        // Get stored login attempts data
+        function getLoginAttempts() {
+            const attempts = localStorage.getItem('loginAttempts');
+            return attempts ? JSON.parse(attempts) : { count: 0, lastAttempt: 0, lockedUntil: 0 };
+        }
+        
+        // Save login attempts data
+        function saveLoginAttempts(attempts) {
+            localStorage.setItem('loginAttempts', JSON.stringify(attempts));
+        }
+        
+        // Check if account is locked
+        function isAccountLocked() {
+            const attempts = getLoginAttempts();
+            const now = Date.now();
+            
+            // Check if lockout period has expired
+            if (attempts.lockedUntil > 0 && now > attempts.lockedUntil) {
+                // Reset attempts after lockout period
+                saveLoginAttempts({ count: 0, lastAttempt: 0, lockedUntil: 0 });
+                return false;
+            }
+            
+            return attempts.count >= MAX_ATTEMPTS;
+        }
+        
+        // Increment failed login attempts
+        function incrementFailedAttempts() {
+            const attempts = getLoginAttempts();
+            attempts.count++;
+            attempts.lastAttempt = Date.now();
+            
+            // Lock account after MAX_ATTEMPTS
+            if (attempts.count >= MAX_ATTEMPTS) {
+                attempts.lockedUntil = Date.now() + LOCKOUT_DURATION;
+            }
+            
+            saveLoginAttempts(attempts);
+        }
+        
+        // Reset login attempts (for successful login)
+        function resetLoginAttempts() {
+            saveLoginAttempts({ count: 0, lastAttempt: 0, lockedUntil: 0 });
+        }
+        
+        // Apply lockout state to form
+        function applyLockoutState() {
+            const form = document.getElementById('loginForm');
+            const inputs = form.querySelectorAll('input');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const links = form.querySelectorAll('a');
+            const lockoutMessage = document.getElementById('lockoutMessage');
+            const attemptCounter = document.getElementById('attemptCounter');
+            const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
-            successMessage.textContent = 'Registration successful! Please login.';
-            successMessage.style.display = 'block';
+            
+            // Hide other messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Disable all form elements
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.value = '';
+            });
+            
+            submitBtn.disabled = true;
+            
+            // Disable all links
+            links.forEach(link => {
+                link.style.pointerEvents = 'none';
+                link.style.color = '#ccc';
+            });
+            
+            // Show lockout message
+            lockoutMessage.style.display = 'block';
+            
+            // Add locked class to form
+            form.classList.add('locked-form');
+            
+            // Prevent form submission
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                return false;
+            };
+            
+            // Prevent any keyboard input
+            document.addEventListener('keydown', (e) => {
+                e.preventDefault();
+                return false;
+            }, true);
+            
+            // Prevent right-click context menu
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Prevent page refresh
+            window.addEventListener('beforeunload', (e) => {
+                e.preventDefault();
+                e.returnValue = '';
+            });
+        }
+        
+        // Show attempt counter
+        function showAttemptCounter() {
+            const attempts = getLoginAttempts();
+            const remaining = MAX_ATTEMPTS - attempts.count;
+            const attemptCounter = document.getElementById('attemptCounter');
+            
+            if (remaining > 0 && attempts.count > 0) {
+                attemptCounter.textContent = `Failed login attempts: ${attempts.count}/${MAX_ATTEMPTS}. ${remaining} attempts remaining.`;
+                attemptCounter.style.display = 'block';
+            } else {
+                attemptCounter.style.display = 'none';
+            }
+        }
+        
+        // Initialize page
+        function initializePage() {
+            // Check if account is locked on page load
+            if (isAccountLocked()) {
+                applyLockoutState();
+                return;
+            }
+            
+            // Show attempt counter if there are previous failed attempts
+            showAttemptCounter();
+            
+            // Check for registration success message
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = 'Registration successful! Please login.';
+                successMessage.style.display = 'block';
+            }
+        }
+        
+        // Initialize page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializePage);
+        
+        // Also check immediately in case DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
         }
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Check if account is locked before processing
+            if (isAccountLocked()) {
+                applyLockoutState();
+                return;
+            }
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -212,6 +412,9 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    // Reset failed attempts on successful login
+                    resetLoginAttempts();
+                    
                     // Show success message
                     successMessage.textContent = 'Login successful! Redirecting...';
                     successMessage.style.display = 'block';
@@ -246,7 +449,7 @@
                                     // For any other role, redirect to blank.html
                                     window.location.href = '/blank.html';
                                 }
-                    } else {
+                            } else {
                                 errorMessage.textContent = 'Session not established. Please try again.';
                                 errorMessage.style.display = 'block';
                                 successMessage.style.display = 'none';
@@ -254,18 +457,44 @@
                         } catch (error) {
                             console.error('Session check error:', error);
                             errorMessage.textContent = 'Error checking session. Please try again.';
-                        errorMessage.style.display = 'block';
+                            errorMessage.style.display = 'block';
                             successMessage.style.display = 'none';
-                    }
+                        }
                     }, 2000); // 2 second delay
                 } else {
+                    // Increment failed attempts
+                    incrementFailedAttempts();
+                    
+                    // Check if account should be locked
+                    if (isAccountLocked()) {
+                        applyLockoutState();
+                        return;
+                    }
+                    
+                    // Show error message
                     errorMessage.textContent = data.error || 'Login failed';
                     errorMessage.style.display = 'block';
+                    
+                    // Update attempt counter
+                    showAttemptCounter();
                 }
             } catch (error) {
                 console.error('Login error:', error);
+                
+                // Increment failed attempts for network errors too
+                incrementFailedAttempts();
+                
+                // Check if account should be locked
+                if (isAccountLocked()) {
+                    applyLockoutState();
+                    return;
+                }
+                
                 errorMessage.textContent = 'Login failed. Please try again.';
                 errorMessage.style.display = 'block';
+                
+                // Update attempt counter
+                showAttemptCounter();
             }
         });
     </script>

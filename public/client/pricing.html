@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Iconic Fibre</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .pricing-hero {
+            background: linear-gradient(rgba(37, 99, 235, 0.9), rgba(30, 64, 175, 0.9)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .pricing-tabs {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .tab-button {
+            padding: 1rem 2rem;
+            border: none;
+            background: var(--light-background);
+            color: var(--text-color);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .hotspot-packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hotspot-card {
+            background: var(--background);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .hotspot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hotspot-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .hotspot-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .hotspot-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .hotspot-features li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hotspot-features i {
+            color: var(--success-color);
+        }
+
+        .package-note {
+            text-align: center;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--light-background);
+            border-radius: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-wifi"></i>
+                <span>Iconic Fibre</span>
+            </a>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="pricing.html" class="active">Pricing</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="/login.html" class="btn-login">Client Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Pricing Hero Section -->
+    <section class="pricing-hero">
+        <div class="container">
+            <h1>Our Internet Packages</h1>
+            <p class="mt-2">Choose the perfect plan for your needs</p>
+        </div>
+    </section>
+
+    <!-- Pricing Tabs -->
+    <section class="pricing-tabs">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="home">Home Internet</button>
+            <button class="tab-button" data-tab="hotspot">Hotspot Packages</button>
+        </div>
+
+        <!-- Home Internet Tab -->
+        <div class="tab-content active" id="home-tab">
+            <div class="plans-grid">
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>Basic</h3>
+                        <div class="price">Ksh 2,999<span>/month</span></div>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> 10 Mbps Download</li>
+                        <li><i class="fas fa-check"></i> 5 Mbps Upload</li>
+                        <li><i class="fas fa-check"></i> Unlimited Data</li>
+                        <li><i class="fas fa-check"></i> Basic Support</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-outline">Get Started</a>
+                </div>
+                <div class="plan-card featured">
+                    <div class="plan-header">
+                        <h3>Pro</h3>
+                        <div class="price">Ksh 4,999<span>/month</span></div>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> 20 Mbps Download</li>
+                        <li><i class="fas fa-check"></i> 10 Mbps Upload</li>
+                        <li><i class="fas fa-check"></i> Unlimited Data</li>
+                        <li><i class="fas fa-check"></i> Priority Support</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-primary">Get Started</a>
+                </div>
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>Business</h3>
+                        <div class="price">Ksh 9,999<span>/month</span></div>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> 50 Mbps Download</li>
+                        <li><i class="fas fa-check"></i> 20 Mbps Upload</li>
+                        <li><i class="fas fa-check"></i> Unlimited Data</li>
+                        <li><i class="fas fa-check"></i> 24/7 Premium Support</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-outline">Get Started</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hotspot Packages Tab -->
+        <div class="tab-content" id="hotspot-tab">
+            <div class="hotspot-packages">
+                <!-- Weekly Package -->
+                <div class="hotspot-card">
+                    <h3>Weekly Package</h3>
+                    <div class="hotspot-price">Ksh 210</div>
+                    <ul class="hotspot-features">
+                        <li><i class="fas fa-check"></i> 24 Hours Access</li>
+                        <li><i class="fas fa-check"></i> Fast Web Browsing</li>
+                        <li><i class="fas fa-check"></i> HD Movie & Music Streaming</li>
+                        <li><i class="fas fa-check"></i> Super Fast Downloads</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-primary">Get Started</a>
+                </div>
+
+                <!-- Monthly Package -->
+                <div class="hotspot-card featured">
+                    <h3>Monthly Package</h3>
+                    <div class="hotspot-price">Ksh 600</div>
+                    <ul class="hotspot-features">
+                        <li><i class="fas fa-check"></i> Unlimited 24hrs Access</li>
+                        <li><i class="fas fa-check"></i> Fast Web Browsing</li>
+                        <li><i class="fas fa-check"></i> UHD Movie & Music Streaming</li>
+                        <li><i class="fas fa-check"></i> Multiple Device Streaming</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-primary">Get Started</a>
+                </div>
+
+                <!-- Hourly Packages -->
+                <div class="hotspot-card">
+                    <h3>Hourly Packages</h3>
+                    <ul class="hotspot-features">
+                        <li><i class="fas fa-check"></i> 20 GB - 24hrs (Ksh 35)</li>
+                        <li><i class="fas fa-check"></i> 2 GB - 24hrs (Ksh 30)</li>
+                        <li><i class="fas fa-check"></i> 100 GB - 12hrs (Ksh 30)</li>
+                        <li><i class="fas fa-check"></i> 4hrs Unlimited (Ksh 25)</li>
+                        <li><i class="fas fa-check"></i> 600MB - 1hr (Ksh 10)</li>
+                        <li><i class="fas fa-check"></i> 12Hrs Unlimited (Ksh 30)</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-outline">Get Started</a>
+                </div>
+            </div>
+
+            <div class="package-note">
+                <p>We handle the payment and breakdown of full internet packages into customizable packages, providing users seamless access to the internet. No installation fees required!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Iconic Fibre</h3>
+                <p>Providing high-speed internet solutions for homes and businesses since 2018.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="pricing.html">Pricing</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Network Status</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <ul class="contact-info">
+                    <li><i class="fas fa-phone"></i> +254 796 030 992</li>
+                    <li><i class="fas fa-envelope"></i> 3iconiclimited@gmail.com</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Nairobi, Kenya</li>
+                    <li><i class="fas fa-globe"></i> www.3iconic.co.ke</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Iconic Fibre. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Tab switching functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html> 

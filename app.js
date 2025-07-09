@@ -19,14 +19,13 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { sendSMS } = require('./utils/sms');
 const stationsRouter = require('./routes/stations');
+const hotspotIssuesRouter = require('./routes/hotspot-issues');
 
 const app = express();
 
 // Middleware
 app.use(cors({ 
-    origin: process.env.NODE_ENV === 'production' 
-        ? 'https://admin-newiconic.onrender.com'
-        : 'http://localhost:3000',
+    origin: 'http://localhost:3000',
     credentials: true 
 }));
 
@@ -59,18 +58,16 @@ app.use(session({
         ttl: 24 * 60 * 60 // Session TTL (1 day)
     }),
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     },
-    proxy: process.env.NODE_ENV === 'production' // Only needed in production
+    proxy: false
 }));
 
-// Add trust proxy for secure cookies in production
-if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 1);
-}
+// Trust proxy setting (disabled for localhost)
+// app.set('trust proxy', 1);
 
 // Debug route to check session
 app.get('/check-session', (req, res) => {
@@ -128,6 +125,8 @@ const enforceRoleAccess = (req, res, next) => {
             '/api/equipment',
             '/equipment-assignment.html',
             '/api/equipment-assignments',
+            '/hotspot-issues.html',  // Add hotspot issues page
+            '/api/hotspot-issues',   // Add hotspot issues API
             '/api/auth/logout',
             '/api/auth/check',
             '/login.html',
@@ -200,6 +199,8 @@ const enforceRoleAccess = (req, res, next) => {
             '/index.html',
             '/tickets.html',
             '/expenses.html',
+            '/hotspot-issues.html',  // Add hotspot issues page
+            '/api/hotspot-issues',   // Add hotspot issues API
             '/api/tickets',
             '/api/expenses',
             '/api/dashboard/stats',
@@ -363,7 +364,7 @@ app.post('/api/auth/login', async (req, res) => {
             
             // Set response headers for CORS
             res.setHeader('Access-Control-Allow-Credentials', 'true');
-            res.setHeader('Access-Control-Allow-Origin', 'https://admin-newiconic.onrender.com');
+            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
             
             res.json({ 
                 success: true, 
@@ -389,6 +390,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/equipment', equipmentRouter);
 app.use('/api/equipment-assignments', equipmentAssignmentsRouter);
 app.use('/api/stations', stationsRouter);
+app.use('/api/hotspot-issues', hotspotIssuesRouter);
 app.use('/api/reminders', require('./routes/reminders'));
 
 // Excel Export endpoint

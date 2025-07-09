@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotspot Issues - Ticketing & Expense System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-loading {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .auth-loading .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .main-content { display: none; }
+        .main-content.authenticated { display: block; }
+        .sidebar {
+            background: linear-gradient(145deg, #1a472a, #2d8659);
+            color: white;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar .nav-links a {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar .logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+        }
+        .sidebar .logo h2 {
+            color: white;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+        .sidebar .logo p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .sidebar .user-profile {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 15px;
+        }
+        .sidebar .logout-btn {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .logout-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .sidebar .nav-links i {
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Form Styles */
+        .hotspot-form-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .form-header {
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        .form-header h1 {
+            color: #223046;
+            font-size: 1.8em;
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .submit-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .submit-btn:hover {
+            background: #2980b9;
+        }
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div id="authLoading" class="auth-loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="sidebar">
+            <div class="logo">
+                <h2>Admin Panel</h2>
+                <p>Hotspot Management System</p>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="tickets.html"><i class="fas fa-ticket-alt"></i> Tickets</a>
+                <a href="expenses.html"><i class="fas fa-file-invoice-dollar"></i> Expenses</a>
+                <a href="stations.html"><i class="fas fa-wifi"></i> Stations</a>
+                <a href="hotspot-issues.html" class="active"><i class="fas fa-exclamation-circle"></i> Hotspot Issues</a>
+                <a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a>
+                <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+            <div class="user-profile">
+                <div id="userInfo">
+                    <p><i class="fas fa-user"></i> <span id="username">Loading...</span></p>
+                    <p><i class="fas fa-user-tag"></i> <span id="userRole">Loading...</span></p>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="hotspot-form-container">
+                <div class="form-header">
+                    <h1>Log Hotspot Client Issue</h1>
+                </div>
+                <form id="hotspotIssueForm">
+                    <div class="form-group">
+                        <label for="clientNumber">Client Number (Phone/Device ID)</label>
+                        <input type="text" id="clientNumber" name="clientNumber" class="form-control" required 
+                               placeholder="Enter client's phone number or device ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="station">Station Location</label>
+                        <input type="text" id="station" name="station" class="form-control" required 
+                               placeholder="Enter station/branch location">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="problemDescription">Problem Description</label>
+                        <textarea id="problemDescription" name="problemDescription" class="form-control" required 
+                                  placeholder="Describe the issue in detail"></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Issue
+                    </button>
+                </form>
+                <div class="form-footer">
+                    <p>Issue will be automatically logged with current date and time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form submission handler
+            document.getElementById('hotspotIssueForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    clientNumber: document.getElementById('clientNumber').value,
+                    station: document.getElementById('station').value,
+                    problemDescription: document.getElementById('problemDescription').value,
+                    dateLogged: new Date().toISOString()
+                };
+
+                try {
+                    const response = await fetch('/api/hotspot-issues', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        alert('Issue logged successfully!');
+                        this.reset();
+                    } else {
+                        throw new Error('Failed to log issue');
+                    }
+                } catch (error) {
+                    alert('Error logging issue: ' + error.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Iconic Fibre</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .about-hero {
+            background: linear-gradient(rgba(37, 99, 235, 0.9), rgba(30, 64, 175, 0.9)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: var(--background);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .mission-vision {
+            padding: 6rem 2rem;
+            background: var(--light-background);
+        }
+
+        .mission-vision-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mission-card, .vision-card {
+            background: var(--background);
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+
+        .mission-card i, .vision-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        .company-overview {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .overview-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .overview-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .overview-image img {
+            width: 100%;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @media (max-width: 768px) {
+            .overview-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-wifi"></i>
+                <span>Iconic Fibre</span>
+            </a>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="/login.html" class="btn-login">Client Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <h1>About Iconic Fibre</h1>
+            <p class="mt-2">Your Trusted Internet Service Provider in Kenya</p>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-calendar-check"></i>
+            <h3>5+</h3>
+            <p>Years of Experience</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-building"></i>
+            <h3>24+</h3>
+            <p>Institutions Served</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <h3>2,700+</h3>
+            <p>Happy Customers</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-wifi"></i>
+            <h3>1000+</h3>
+            <p>Daily Hotspot Users</p>
+        </div>
+    </section>
+
+    <!-- Mission & Vision Section -->
+    <section class="mission-vision">
+        <h2>Our Mission & Vision</h2>
+        <div class="mission-vision-grid">
+            <div class="mission-card">
+                <i class="fas fa-bullseye"></i>
+                <h3>Our Mission</h3>
+                <p>To provide fast and reliable internet connection to our clients, enabling them to stay connected and productive in today's digital world.</p>
+            </div>
+            <div class="vision-card">
+                <i class="fas fa-eye"></i>
+                <h3>Our Vision</h3>
+                <p>To be the leading internet provider in Africa, known for our quality service, affordable prices, and commitment to customer satisfaction.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company Overview Section -->
+    <section class="company-overview">
+        <h2>Company Overview</h2>
+        <div class="overview-content">
+            <div class="overview-text">
+                <p>Iconic Fibre is a national Internet Service Provider (ISP) in Kenya, offering wireless broadband to low-income and rural & urban communities. We provide quality data usage with high speeds and undisturbed coverage, enabling subscribers to access improved quality internet connections at low-cost prices.</p>
+                <p class="mt-3">Our hotspot packages are a unique way of competing in the existing market. The low-cost internet packages work favorably with our clients, with no need for installation fees. This has enabled a wider customer service reach.</p>
+                <p class="mt-3">We are constantly growing and expanding our coverage to serve more communities across Kenya. Our aim is to provide quality and reliable internet services that are extremely low cost to cater to our customer needs.</p>
+            </div>
+            <div class="overview-image">
+                <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Iconic Fibre Network">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Iconic Fibre</h3>
+                <p>Providing high-speed internet solutions for homes and businesses since 2018.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="pricing.html">Pricing</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Network Status</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <ul class="contact-info">
+                    <li><i class="fas fa-phone"></i> +254 796 030 992</li>
+                    <li><i class="fas fa-envelope"></i> 3iconiclimited@gmail.com</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Nairobi, Kenya</li>
+                    <li><i class="fas fa-globe"></i> www.3iconic.co.ke</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Iconic Fibre. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 

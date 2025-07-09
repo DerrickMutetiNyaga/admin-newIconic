@@ -35,7 +35,8 @@ function handleNavigationVisibility(userRole) {
         const allowedLinks = [
             document.querySelector('a[href="tickets.html"]').parentElement,
             document.querySelector('a[href="equipment.html"]').parentElement,
-            document.querySelector('a[href="equipment-assignment.html"]').parentElement
+            document.querySelector('a[href="equipment-assignment.html"]').parentElement,
+            document.querySelector('a[href="hotspot-issues.html"]').parentElement
         ];
 
         allowedLinks.forEach(link => {
@@ -44,7 +45,7 @@ function handleNavigationVisibility(userRole) {
 
         // Check if current page is allowed
         const currentPath = window.location.pathname;
-        const allowedPaths = ['/tickets.html', '/equipment.html', '/equipment-assignment.html'];
+        const allowedPaths = ['/tickets.html', '/equipment.html', '/equipment-assignment.html', '/hotspot-issues.html'];
         
         if (!allowedPaths.includes(currentPath)) {
             // If trying to access unauthorized page, log out
@@ -149,7 +150,7 @@ document.addEventListener('click', (event) => {
     const link = event.target.closest('a');
     if (link && link.getAttribute('href')) {
         const href = link.getAttribute('href');
-        const allowedPaths = ['tickets.html', 'equipment.html', 'equipment-assignment.html'];
+        const allowedPaths = ['tickets.html', 'equipment.html', 'equipment-assignment.html', 'hotspot-issues.html'];
         
         // Check if user is staff and trying to access unauthorized page
         fetch('/api/auth/check', { credentials: 'include' })
