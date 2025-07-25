@@ -433,10 +433,13 @@ async function loadEquipment() {
             throw new Error('Failed to load equipment');
         }
 
-        const data = await response.json();
-        console.log('Loaded equipment data:', data);
-        displayEquipment(data);
-        updateStats(data);
+        const result = await response.json();
+        if (!result.success || !Array.isArray(result.data)) {
+            throw new Error(result.error || result.message || 'Invalid equipment data format');
+        }
+        console.log('Loaded equipment data:', result.data);
+        displayEquipment(result.data);
+        updateStats(result.data);
     } catch (error) {
         console.error('Error loading equipment:', error);
         showNotification('Error loading equipment', 'error');

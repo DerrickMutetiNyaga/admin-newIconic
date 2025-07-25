@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -392,6 +394,26 @@ app.use('/api/equipment-assignments', equipmentAssignmentsRouter);
 app.use('/api/stations', stationsRouter);
 app.use('/api/hotspot-issues', hotspotIssuesRouter);
 app.use('/api/reminders', require('./routes/reminders'));
+
+// Catch-all for API 404s
+app.use('/api/*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        error: `API endpoint not found: ${req.originalUrl}`
+    });
+});
+
+// Serve static files for all other routes
+app.use((req, res) => {
+    // Check if the requested path exists in public folder
+    const filePath = path.join(__dirname, 'public', req.path);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        // Redirect to index.html for non-existent client routes
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
+});
 
 // Excel Export endpoint
 app.get('/api/tickets/export', requireAuth, async (req, res) => {

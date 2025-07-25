@@ -11,13 +11,23 @@ router.get('/assignments', async (req, res) => {
             .populate({ path: 'equipmentId', select: 'equipmentName macAddress', model: 'Equipment' })
             .sort({ createdAt: -1 })
             .lean();
+        
+        if (!Array.isArray(assignments)) {
+            throw new Error('Invalid assignments data format');
+        }
+        
         // Map equipmentId to equipment for frontend compatibility
         const mapped = assignments.map(a => ({
             ...a,
             equipment: a.equipmentId,
-            equipmentId: undefined
+            equipmentId: a.equipmentId ? (typeof a.equipmentId === 'object' ? a.equipmentId._id : a.equipmentId) : null
         }));
-        res.json(mapped);
+        
+        res.json({ 
+            success: true, 
+            data: mapped,
+            totalCount: mapped.length
+        });
     } catch (error) {
         console.error('Error fetching assignments:', error);
         res.status(500).json({ message: 'Error fetching assignments' });

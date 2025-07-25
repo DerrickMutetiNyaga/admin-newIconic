@@ -96,8 +96,11 @@ async function loadAssignments() {
             throw new Error('Failed to load assignments');
         }
         
-        const assignments = await response.json();
-        displayAssignments(assignments);
+        const result = await response.json();
+        if (!result.success || !Array.isArray(result.data)) {
+            throw new Error(result.error || result.message || 'Invalid assignments data format');
+        }
+        displayAssignments(result.data);
     } catch (error) {
         console.error('Error loading assignments:', error);
         const assignmentsList = document.getElementById('assignmentsList');
